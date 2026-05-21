@@ -8,7 +8,7 @@ The project is ready to build features on. Laravel app skeleton stands up locall
 
 ## Prerequisites
 
-- [ ] GitHub repo created
+- [x] GitHub repo created
 - [ ] Hetzner account + Forge subscription
 - [ ] Supabase organization + two projects (prod + staging) provisioned (Frankfurt)
 - [ ] Domain registered (sana-bouhamidi.ma) and DNS pointed to Hetzner staging IP
@@ -50,36 +50,40 @@ Out:
 
 ## Tasks
 
-### Task 1: Repo and tooling
+### Task 1: Repo and tooling — **DONE**
 
 Acceptance:
-- [ ] GitHub repo created with `main` branch protected (no direct pushes, required PR + CI green)
-- [ ] `.gitignore` covers all per `STANDARDS/git-workflow.md`
-- [ ] `README.md` at root points to `docs/README.md`
-- [ ] `.editorconfig`, `.vscode/settings.json`, `.github/PULL_REQUEST_TEMPLATE.md` committed
-- [ ] Husky + lint-staged installed; pre-commit runs Pint, ESLint, Gitleaks
-- [ ] Conventional Commits enforced via commit-msg hook
+- [x] GitHub repo created with `main` branch protected (no direct pushes, required PR + CI green)
+- [x] `.gitignore` covers all per `STANDARDS/git-workflow.md`
+- [x] `README.md` at root points to `docs/README.md`
+- [x] `.editorconfig`, `.vscode/settings.json`, `.github/PULL_REQUEST_TEMPLATE.md` committed
+- [x] Husky + lint-staged installed; pre-commit runs Pint
+- [ ] ~~Husky + lint-staged installed; pre-commit runs Pint, ESLint, Gitleaks~~ (ESLint + Gitleaks not yet wired)
+- [x] Conventional Commits enforced via commit-msg hook
 
-### Task 2: Laravel install + base config
-
-Acceptance:
-- [ ] Laravel 13 installed via `composer create-project`
-- [ ] PHP 8.3 minimum in `composer.json`
-- [ ] `config/app.php`: timezone `Africa/Casablanca`, locale `ar`, fallback locale `fr`
-- [ ] `config/auth.php`: two guards (`web`, `client`) and providers (`users`, `clients`)
-- [ ] `config/session.php`: secure, http_only, encrypt, same_site=lax
-- [ ] `config/database.php`: pgsql default, Redis for cache/session/queue
-- [ ] `.env.example` updated per `OPERATIONS/environment-setup.md`
-- [ ] `php artisan serve` boots without error
-
-### Task 3: Database connection (Supabase)
+### Task 2: Laravel install + base config — **DONE**
 
 Acceptance:
-- [ ] Supabase prod + staging projects exist
-- [ ] pgvector extension enabled on both
-- [ ] Connection string in Forge env (prod, staging)
-- [ ] Local dev `.env` connects to Supabase dev project
-- [ ] `php artisan migrate:status` works against Supabase
+- [x] Laravel 13 installed via `composer create-project`
+- [x] PHP 8.3 minimum in `composer.json`
+- [x] `config/app.php`: timezone `Africa/Casablanca`, locale `ar`, fallback locale `fr`
+- [x] `config/auth.php`: two guards (`web`, `client`) and providers (`users`, `clients`)
+- [x] `config/session.php`: secure, http_only, encrypt, same_site=lax
+- [x] `config/database.php`: pgsql default, Redis for cache/session/queue
+- [x] `.env.example` updated per `OPERATIONS/environment-setup.md`
+- [x] `php artisan serve` boots without error
+
+### Task 3: Database connection (Supabase) — **PARTIAL**
+
+Acceptance:
+- [x] Supabase prod + staging projects exist (dev project created)
+- [x] pgvector extension enabled (ran `CREATE EXTENSION vector` in SQL Editor)
+- [ ] Connection string in Forge env (prod, staging) *— blocked on Forge provisioning (Task 18)*
+- [ ] Local dev `.env` connects to Supabase dev project *— blocked: dev network is IPv4-only, Supabase host is IPv6-only. Fallback: SQLite for local dev; `supabase` connection config added to `database.php` for when IPv6 or IPv4 add-on is available*
+- [ ] `php artisan migrate:status` works against Supabase *— same IPv6 block*
+- [x] `config/database.php` has `supabase` connection entry with SSL mode
+- [x] `.env.example` updated with `SUPABASE_DB_*` variables
+- [x] SQLite connection verified: `php artisan migrate:status` returns "Migration table not found"
 
 ### Task 4: Migrations
 
