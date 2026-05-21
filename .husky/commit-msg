@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Conventional Commits validation
+COMMIT_MSG=$(cat "$1")
+if ! echo "$COMMIT_MSG" | grep -qE "^(feat|fix|chore|refactor|perf|test|docs|ci)\([a-z-]+\): .+|^(breaking|build|revert): .+"; then
+  echo "ERROR: Commit message must follow Conventional Commits format."
+  echo "Examples:"
+  echo "  feat(booking): add slot hold mechanism"
+  echo "  fix(payment): verify webhook signature"
+  echo "  chore(deps): upgrade filament to 3.1"
+  exit 1
+fi
