@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin Login - Maître Sana Bouhamidi</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#0f1c2d",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#c9c6c0",
+                        "surface-tint": "#535f73",
+                        "surface-container": "#f4ede1",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#bac7de",
+                        "primary-fixed": "#d6e3fb",
+                        "on-primary-fixed-variant": "#3b475a",
+                        "surface-dim": "#e0d9ce",
+                        "secondary-container": "#fcc977",
+                        "primary": "#000000",
+                        "on-tertiary-fixed": "#1c1c18",
+                        "secondary": "#7d570d",
+                        "surface-variant": "#e8e2d6",
+                        "tertiary-fixed": "#e6e2db",
+                        "on-tertiary-fixed-variant": "#484742",
+                        "inverse-on-surface": "#f7f0e4",
+                        "primary-fixed-dim": "#bac7de",
+                        "on-surface-variant": "#44474c",
+                        "secondary-fixed": "#ffdead",
+                        "on-secondary-fixed": "#281900",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#604100",
+                        "tertiary": "#000000",
+                        "surface-container-low": "#faf3e7",
+                        "secondary-fixed-dim": "#f0be6d",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#1e1b14",
+                        "error": "#ba1a1a",
+                        "background": "#fff8ef",
+                        "on-primary-fixed": "#0f1c2d",
+                        "outline-variant": "#c5c6cd",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#eee7dc",
+                        "on-secondary-container": "#775307",
+                        "inverse-surface": "#333028",
+                        "on-primary-container": "#78859a",
+                        "surface-bright": "#fff8ef",
+                        "surface": "#fff8ef",
+                        "tertiary-container": "#1c1c18",
+                        "surface-container-highest": "#e8e2d6",
+                        "on-surface": "#1e1b14",
+                        "on-tertiary-container": "#86847e",
+                        "outline": "#75777d",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "section-v-rhythm-max": "128px",
+                        "max-width": "1240px",
+                        "margin-mobile": "16px",
+                        "section-v-rhythm-min": "96px",
+                        "gutter": "24px",
+                        "base-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["EB Garamond", "serif"],
+                        "headline-md": ["EB Garamond", "serif"],
+                        "display-lg-mobile": ["EB Garamond", "serif"],
+                        "display-lg": ["EB Garamond", "serif"],
+                        "caption": ["Inter", "sans-serif"],
+                        "label-md": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "headline-md": ["32px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "display-lg-mobile": ["40px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "display-lg": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "caption": ["13px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom Input Styles */
+        .admin-input:focus-within {
+            border-color: #000000;
+            box-shadow: 0 0 0 2px #fff8ef, 0 0 0 4px #7d570d;
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen flex text-on-surface antialiased selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- Left Side: Brand Panel -->
+<div class="hidden lg:flex lg:w-1/2 bg-primary-container relative flex-col justify-center items-center p-12 overflow-hidden">
+<!-- Abstract Zellige Ornamentation (Faint lines) -->
+<div class="absolute inset-0 pointer-events-none opacity-5" style="background-image: repeating-linear-gradient(45deg, #c5c6cd 0, #c5c6cd 1px, transparent 1px, transparent 32px), repeating-linear-gradient(-45deg, #c5c6cd 0, #c5c6cd 1px, transparent 1px, transparent 32px);">
+</div>
+<div class="relative z-10 flex flex-col items-center text-center max-w-md">
+<h1 class="font-display-lg text-display-lg text-surface-container-lowest mb-4 border-b-2 border-secondary pb-4">
+                Sana Bouhamidi
+            </h1>
+<p class="font-body-lg text-body-lg text-surface-variant tracking-wider uppercase">
+                Espace Administrateur
+            </p>
+</div>
+<!-- Bottom Decorative Line -->
+<div class="absolute bottom-12 w-24 h-px bg-surface-variant opacity-30"></div>
+</div>
+<!-- Right Side: Login Form Panel -->
+<div class="w-full lg:w-1/2 flex flex-col justify-center items-center bg-surface p-6 sm:p-12 relative">
+<div class="w-full max-w-[360px] relative z-10">
+<!-- Mobile Title (Hidden on Desktop) -->
+<div class="lg:hidden mb-12 text-center border-b border-outline-variant pb-6">
+<h1 class="font-headline-md text-headline-md text-primary mb-2">Sana Bouhamidi</h1>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase">Espace Administrateur</p>
+</div>
+<div class="mb-10 text-center lg:text-left">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-2">Connexion</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Accès sécurisé à l'intranet notarial.</p>
+</div>
+<form class="space-y-6">
+<!-- Email Field -->
+<div class="relative group admin-input rounded-md transition-all duration-200">
+<label class="absolute -top-2.5 left-3 bg-surface px-1 font-caption text-caption text-on-surface-variant z-10 transition-colors group-focus-within:text-primary" for="email">Email professionnel</label>
+<input class="w-full h-12 bg-surface-container-lowest border border-outline text-on-surface rounded-md px-4 font-body-md focus:outline-none focus:ring-0 focus:border-outline transition-colors" id="email" name="email" placeholder="nom@sanabouhamidi.ma" required="" type="email"/>
+</div>
+<!-- Password Field -->
+<div class="relative group admin-input rounded-md transition-all duration-200">
+<label class="absolute -top-2.5 left-3 bg-surface px-1 font-caption text-caption text-on-surface-variant z-10 transition-colors group-focus-within:text-primary" for="password">Mot de passe</label>
+<input class="w-full h-12 bg-surface-container-lowest border border-outline text-on-surface rounded-md pl-4 pr-12 font-body-md focus:outline-none focus:ring-0 focus:border-outline transition-colors" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-on-secondary-container transition-colors p-1 flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</div>
+<!-- Forgot Password Link -->
+<div class="flex justify-end">
+<a class="font-label-md text-label-md text-secondary hover:text-on-secondary-container transition-colors underline-offset-4 hover:underline" href="#">Mot de passe oublié?</a>
+</div>
+<!-- Primary Action -->
+<button class="w-full h-12 bg-secondary text-on-secondary font-label-md text-label-md rounded-md hover:bg-on-secondary-container transition-colors duration-200 flex items-center justify-center gap-2" type="submit">
+                    Se connecter
+                    <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<!-- Divider -->
+<div class="relative flex items-center py-4">
+<div class="flex-grow border-t border-outline-variant"></div>
+<span class="flex-shrink-0 mx-4 font-caption text-caption text-on-surface-variant">ou authentification 2FA</span>
+<div class="flex-grow border-t border-outline-variant"></div>
+</div>
+<!-- 2FA Field -->
+<div class="relative group admin-input rounded-md transition-all duration-200">
+<label class="absolute -top-2.5 left-3 bg-surface px-1 font-caption text-caption text-on-surface-variant z-10 transition-colors group-focus-within:text-primary" for="2fa">Code de sécurité (2FA)</label>
+<input class="w-full h-14 bg-surface-container-lowest border border-outline text-on-surface rounded-md px-4 font-mono text-center text-lg tracking-[0.5em] focus:outline-none focus:ring-0 focus:border-outline transition-colors uppercase" id="2fa" maxlength="6" name="2fa" pattern="[0-9A-Z]{6}" placeholder="------" type="text"/>
+<p class="mt-2 font-caption text-caption text-on-surface-variant text-center">Saisissez le code à 6 chiffres de votre application.</p>
+</div>
+</form>
+<!-- Contextual Footer (Optional subtle branding for the form container) -->
+<div class="mt-12 pt-6 border-t border-outline-variant/50 text-center">
+<p class="font-caption text-caption text-on-surface-variant flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="lock">lock</span>
+                    Connexion chiffrée de bout en bout
+                </p>
+</div>
+</div>
+</div>
+<script>
+        // Simple password toggle logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtns = document.querySelectorAll('button:has(.material-symbols-outlined[data-icon="visibility"])');
+            
+            toggleBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const input = this.parentElement.querySelector('input');
+                    const icon = this.querySelector('.material-symbols-outlined');
+                    
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.textContent = 'visibility_off';
+                        icon.setAttribute('data-icon', 'visibility_off');
+                    } else {
+                        input.type = 'password';
+                        icon.textContent = 'visibility';
+                        icon.setAttribute('data-icon', 'visibility');
+                    }
+                });
+            });
+            
+            // Format 2FA input
+            const twoFaInput = document.getElementById('2fa');
+            if(twoFaInput) {
+                twoFaInput.addEventListener('input', function(e) {
+                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
+                });
+            }
+        });
+    </script>
+</body></html>

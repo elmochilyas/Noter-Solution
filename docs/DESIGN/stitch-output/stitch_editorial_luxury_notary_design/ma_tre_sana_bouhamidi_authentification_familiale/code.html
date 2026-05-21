@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Authentification familiale - Maître Sana Bouhamidi</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#1e1b14",
+                        "on-primary-fixed": "#0f1c2d",
+                        "tertiary-fixed-dim": "#c9c6c0",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#fff8ef",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#484742",
+                        "outline-variant": "#c5c6cd",
+                        "on-surface-variant": "#44474c",
+                        "secondary-container": "#fcc977",
+                        "error": "#ba1a1a",
+                        "tertiary": "#000000",
+                        "surface-container-low": "#faf3e7",
+                        "on-secondary-fixed": "#281900",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#e8e2d6",
+                        "on-error-container": "#93000a",
+                        "background": "#fff8ef",
+                        "surface-dim": "#e0d9ce",
+                        "on-primary-fixed-variant": "#3b475a",
+                        "on-primary-container": "#78859a",
+                        "secondary-fixed-dim": "#f0be6d",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e8e2d6",
+                        "primary-container": "#0f1c2d",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#7d570d",
+                        "on-surface": "#1e1b14",
+                        "secondary-fixed": "#ffdead",
+                        "on-tertiary-fixed": "#1c1c18",
+                        "inverse-surface": "#333028",
+                        "primary": "#000000",
+                        "inverse-primary": "#bac7de",
+                        "tertiary-container": "#1c1c18",
+                        "surface-container-high": "#eee7dc",
+                        "surface-container": "#f4ede1",
+                        "surface": "#fff8ef",
+                        "tertiary-fixed": "#e6e2db",
+                        "on-secondary-container": "#775307",
+                        "on-secondary-fixed-variant": "#604100",
+                        "primary-fixed-dim": "#bac7de",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f7f0e4",
+                        "primary-fixed": "#d6e3fb",
+                        "surface-tint": "#535f73",
+                        "on-tertiary-container": "#86847e",
+                        "outline": "#75777d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "section-v-rhythm-max": "128px",
+                        "base-unit": "8px",
+                        "margin-mobile": "16px",
+                        "section-v-rhythm-min": "96px",
+                        "gutter": "24px",
+                        "max-width": "1240px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["ebGaramond"],
+                        "headline-lg": ["ebGaramond"],
+                        "display-lg-mobile": ["ebGaramond"],
+                        "caption": ["inter"],
+                        "body-lg": ["inter"],
+                        "body-md": ["inter"],
+                        "label-md": ["inter"],
+                        "display-lg": ["ebGaramond"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["32px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "headline-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "display-lg-mobile": ["40px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "caption": ["13px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- 1. Header -->
+<header class="bg-surface dark:bg-surface-dim sticky top-0 w-full z-50 border-b border-outline-variant dark:border-outline">
+<div class="flex justify-between items-center h-20 px-gutter max-w-max-width mx-auto">
+<a class="font-display-lg text-display-lg-mobile md:text-headline-md text-primary dark:text-primary-fixed-dim italic" href="#">
+                Maître Sana Bouhamidi
+            </a>
+<nav class="hidden md:flex gap-8 items-center h-full">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-300 flex items-center h-full" href="#">
+                    À propos
+                </a>
+<a class="font-label-md text-label-md text-primary dark:text-primary-fixed-dim border-b-2 border-secondary flex items-center h-full opacity-80 transition-opacity" href="#">
+                    Services
+                </a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-300 flex items-center h-full" href="#">
+                    Consultation
+                </a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-300 flex items-center h-full" href="#">
+                    FAQ
+                </a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-300 flex items-center h-full" href="#">
+                    Contact
+                </a>
+</nav>
+<div class="hidden md:block">
+<a class="font-label-md text-label-md h-12 px-6 bg-secondary text-on-primary flex items-center justify-center rounded-lg hover:bg-secondary/90 transition-colors" href="#">
+                    Prendre rendez-vous
+                </a>
+</div>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined text-3xl">menu</span>
+</button>
+</div>
+</header>
+<!-- 2. Breadcrumb -->
+<div class="max-w-max-width mx-auto px-gutter pt-8">
+<nav aria-label="Breadcrumb" class="font-caption text-caption text-on-surface-variant flex items-center gap-2">
+<a class="hover:text-secondary transition-colors" href="#">Accueil</a>
+<span>/</span>
+<a class="hover:text-secondary transition-colors" href="#">Services</a>
+<span>/</span>
+<span class="text-on-background">Authentification familiale</span>
+</nav>
+</div>
+<!-- 3. Hero -->
+<section class="max-w-max-width mx-auto px-gutter py-16 md:py-section-v-rhythm-min">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+<div class="lg:col-span-7 flex flex-col justify-center">
+<span class="font-label-md text-label-md text-secondary uppercase tracking-widest mb-6 block">Service</span>
+<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-background mb-8">
+                    Authentification familiale
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                    L'accompagnement notarial est essentiel pour garantir la sécurité juridique lors des moments charnières de votre vie familiale. Que ce soit pour sceller une union, organiser une succession ou formaliser une séparation, notre étude vous assure un cadre légal rigoureux, traité avec la plus grande discrétion et humanité.
+                </p>
+</div>
+<div class="lg:col-span-5 relative">
+<div class="sticky top-32 bg-surface-container-lowest border border-outline-variant rounded-full p-8 md:p-10 relative overflow-hidden">
+<!-- Brass Top Border -->
+<div class="absolute top-0 left-0 right-0 h-[3px] bg-secondary"></div>
+<div class="mb-8">
+<span class="block font-caption text-caption text-on-surface-variant uppercase tracking-widest mb-2">Honoraires de base</span>
+<div class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background">
+                            À partir de — 250 MAD
+                        </div>
+<div class="font-body-md text-body-md text-on-surface-variant mt-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+                            Consultation 30–60 min
+                        </div>
+</div>
+<div class="space-y-4">
+<a class="w-full h-12 bg-secondary text-on-primary rounded-lg flex items-center justify-center font-label-md text-label-md hover:bg-on-background transition-colors duration-300" href="#reserver">
+                            Prendre rendez-vous
+                        </a>
+<p class="font-caption text-caption text-on-surface-variant text-center">
+                            Les honoraires finaux dépendent de la complexité du dossier.
+                        </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Visual Divider -->
+<section class="max-w-max-width mx-auto px-gutter pb-16 md:pb-section-v-rhythm-min">
+<div class="w-full h-64 md:h-[400px] bg-surface-container-highest border border-outline-variant rounded-xl overflow-hidden relative">
+<img alt="Modern minimal office interior" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uh7lKQnfTRYzWn3YYe_Siz2rkglPtFNkN30QmhHDfsKWUlW_zf3u0tvHtuTl0Ud9VXe2IbbVm12ca3BSqqTvCqZpOLx5Yhe_lIZiJzGyy7IDheEiZuy_KkAVH6Sx5oHfAWubYN1HuT-nxQRVCSPBb4sXjmmYLqp7X9vrCzIPfSkdf2-lbZwRZ7i1uoU5I1zw-n5mnIRw_RvkNeoAsHpGpjTDyLTW-hlT9sD_ZPXVmOdib2TdnIH-3g_Uoo"/>
+<div class="absolute inset-0 bg-on-background/5"></div>
+</div>
+</section>
+<!-- 4. Transactions covered -->
+<section class="bg-surface py-16 md:py-section-v-rhythm-min border-t border-outline-variant">
+<div class="max-w-max-width mx-auto px-gutter">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-12">
+                Actes traités
+            </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-full p-8 relative group hover:border-secondary transition-colors duration-300">
+<div class="absolute top-0 left-0 right-0 h-[3px] bg-surface-container-lowest group-hover:bg-secondary transition-colors duration-300"></div>
+<span class="material-symbols-outlined text-secondary text-3xl mb-6" data-icon="favorite">favorite</span>
+<h3 class="font-headline-md text-headline-md text-on-background mb-3">Mariage</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Rédaction et authentification du contrat de mariage, conseil sur le régime matrimonial.</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-full p-8 relative group hover:border-secondary transition-colors duration-300">
+<div class="absolute top-0 left-0 right-0 h-[3px] bg-surface-container-lowest group-hover:bg-secondary transition-colors duration-300"></div>
+<span class="material-symbols-outlined text-secondary text-3xl mb-6" data-icon="balance">balance</span>
+<h3 class="font-headline-md text-headline-md text-on-background mb-3">Divorce</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Accompagnement légal pour la rédaction des conventions de divorce par consentement mutuel.</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-full p-8 relative group hover:border-secondary transition-colors duration-300">
+<div class="absolute top-0 left-0 right-0 h-[3px] bg-surface-container-lowest group-hover:bg-secondary transition-colors duration-300"></div>
+<span class="material-symbols-outlined text-secondary text-3xl mb-6" data-icon="account_tree">account_tree</span>
+<h3 class="font-headline-md text-headline-md text-on-background mb-3">Succession et fara'id</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Établissement des actes de notoriété et partage successoral selon le droit marocain.</p>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-full p-8 relative group hover:border-secondary transition-colors duration-300">
+<div class="absolute top-0 left-0 right-0 h-[3px] bg-surface-container-lowest group-hover:bg-secondary transition-colors duration-300"></div>
+<span class="material-symbols-outlined text-secondary text-3xl mb-6" data-icon="family_restroom">family_restroom</span>
+<h3 class="font-headline-md text-headline-md text-on-background mb-3">Déclarations de filiation</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Actes authentiques pour la reconnaissance de paternité ou les déclarations familiales légales.</p>
+</div>
+<!-- Card 5 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-full p-8 relative group hover:border-secondary transition-colors duration-300">
+<div class="absolute top-0 left-0 right-0 h-[3px] bg-surface-container-lowest group-hover:bg-secondary transition-colors duration-300"></div>
+<span class="material-symbols-outlined text-secondary text-3xl mb-6" data-icon="gavel">gavel</span>
+<h3 class="font-headline-md text-headline-md text-on-background mb-3">Acte de répudiation</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Formalisation notariée et accompagnement dans les procédures de séparation spécifiques.</p>
+</div>
+<!-- Card 6 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-full p-8 relative group hover:border-secondary transition-colors duration-300">
+<div class="absolute top-0 left-0 right-0 h-[3px] bg-surface-container-lowest group-hover:bg-secondary transition-colors duration-300"></div>
+<span class="material-symbols-outlined text-secondary text-3xl mb-6" data-icon="inventory">inventory</span>
+<h3 class="font-headline-md text-headline-md text-on-background mb-3">Inventaire successoral</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Recensement officiel et estimation du patrimoine pour garantir l'équité entre héritiers.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. Required documents -->
+<section class="max-w-max-width mx-auto px-gutter py-16 md:py-section-v-rhythm-min">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<div class="lg:col-span-5">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-6">
+                    Documents nécessaires
+                </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">
+                    Afin d'accélérer le traitement de votre dossier, nous vous invitons à préparer les pièces justificatives suivantes avant votre consultation.
+                </p>
+<button class="h-12 border border-on-background text-on-background bg-transparent rounded-lg px-6 inline-flex items-center gap-3 hover:bg-surface-container transition-colors font-label-md text-label-md">
+                    Télécharger la liste (PDF)
+                    <span class="material-symbols-outlined text-[18px]">arrow_downward</span>
+</button>
+</div>
+<div class="lg:col-span-7">
+<div class="bg-surface-container-low border border-outline-variant p-8 md:p-12 rounded-xl">
+<ul class="flex flex-col gap-5">
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-lg text-body-lg text-on-background">Carte d'Identité Nationale (CIN) en cours de validité</span>
+</li>
+<li class="w-full h-[1px] bg-outline-variant/50"></li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-lg text-body-lg text-on-background">Acte de naissance récent (moins de 3 mois)</span>
+</li>
+<li class="w-full h-[1px] bg-outline-variant/50"></li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-lg text-body-lg text-on-background">Copie du Livret de famille (le cas échéant)</span>
+</li>
+<li class="w-full h-[1px] bg-outline-variant/50"></li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-lg text-body-lg text-on-background">Justificatif de domicile (facture récente)</span>
+</li>
+<li class="w-full h-[1px] bg-outline-variant/50"></li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-lg text-body-lg text-on-background">Certificat de fiançailles (pour les contrats de mariage)</span>
+</li>
+<li class="w-full h-[1px] bg-outline-variant/50"></li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-lg text-body-lg text-on-background">Certificat médical prénuptial</span>
+</li>
+<li class="w-full h-[1px] bg-outline-variant/50"></li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-lg text-body-lg text-on-background">Copie de l'acte de mariage ou jugement (pour les divorces)</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<!-- 6. Process -->
+<section class="bg-surface py-16 md:py-section-v-rhythm-min border-t border-outline-variant">
+<div class="max-w-max-width mx-auto px-gutter">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-16 text-center">
+                Déroulement
+            </h2>
+<div class="flex flex-col md:flex-row gap-12 md:gap-8 relative">
+<!-- Connective Line Desktop -->
+<div class="hidden md:block absolute top-[28px] left-[10%] right-[10%] h-[1px] bg-outline-variant z-0"></div>
+<!-- Step 1 -->
+<div class="flex-1 flex flex-col items-center text-center relative z-10">
+<div class="w-14 h-14 rounded-full border border-secondary bg-surface flex items-center justify-center font-headline-md text-headline-md text-secondary mb-6 shadow-[0_0_0_10px_#fff8ef]">
+                        1
+                    </div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-3">Prise de contact</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Planification de votre premier rendez-vous pour exposer votre situation en toute confidentialité.</p>
+</div>
+<!-- Step 2 -->
+<div class="flex-1 flex flex-col items-center text-center relative z-10">
+<div class="w-14 h-14 rounded-full border border-secondary bg-surface flex items-center justify-center font-headline-md text-headline-md text-secondary mb-6 shadow-[0_0_0_10px_#fff8ef]">
+                        2
+                    </div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-3">Préparation du dossier</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Collecte des documents nécessaires et analyse juridique préliminaire par notre étude.</p>
+</div>
+<!-- Step 3 -->
+<div class="flex-1 flex flex-col items-center text-center relative z-10">
+<div class="w-14 h-14 rounded-full border border-secondary bg-surface flex items-center justify-center font-headline-md text-headline-md text-secondary mb-6 shadow-[0_0_0_10px_#fff8ef]">
+                        3
+                    </div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-3">Consultation</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Entretien avec Maître Bouhamidi pour valider la démarche et répondre à vos interrogations.</p>
+</div>
+<!-- Step 4 -->
+<div class="flex-1 flex flex-col items-center text-center relative z-10">
+<div class="w-14 h-14 rounded-full border border-secondary bg-surface flex items-center justify-center font-headline-md text-headline-md text-secondary mb-6 shadow-[0_0_0_10px_#fff8ef]">
+                        4
+                    </div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-3">Authentification</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Signature officielle des actes, garantissant leur force probatoire et exécutoire.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 7. FAQ -->
+<section class="max-w-max-width mx-auto px-gutter py-16 md:py-section-v-rhythm-min">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-12 text-center">
+            Questions fréquentes
+        </h2>
+<div class="max-w-3xl mx-auto border-t border-outline-variant">
+<!-- FAQ Item 1 -->
+<div class="border-b border-outline-variant">
+<button class="w-full py-6 flex justify-between items-center text-left group" onclick="toggleFaq(this)">
+<span class="font-headline-md text-headline-md text-on-background">Combien de temps prend la rédaction d'un acte de mariage ?</span>
+<span class="material-symbols-outlined text-secondary transform transition-transform duration-300">expand_more</span>
+</button>
+<div class="overflow-hidden max-h-0 transition-all duration-300">
+<p class="font-body-md text-body-md text-on-surface-variant pb-6 pr-12">
+                        Généralement, si le dossier est complet, la rédaction et l'authentification peuvent être réalisées sous 48 à 72 heures. Nous recommandons toutefois de nous contacter au moins deux semaines avant la date prévue pour garantir un traitement serein.
+                    </p>
+</div>
+</div>
+<!-- FAQ Item 2 -->
+<div class="border-b border-outline-variant">
+<button class="w-full py-6 flex justify-between items-center text-left group" onclick="toggleFaq(this)">
+<span class="font-headline-md text-headline-md text-on-background">Le recours à un notaire est-il obligatoire pour un divorce ?</span>
+<span class="material-symbols-outlined text-secondary transform transition-transform duration-300">expand_more</span>
+</button>
+<div class="overflow-hidden max-h-0 transition-all duration-300">
+<p class="font-body-md text-body-md text-on-surface-variant pb-6 pr-12">
+                        Bien que l'avocat soit au centre de la procédure judiciaire de divorce, le notaire est indispensable pour liquider le régime matrimonial et procéder au partage des biens immobiliers communs en toute sécurité légale.
+                    </p>
+</div>
+</div>
+<!-- FAQ Item 3 -->
+<div class="border-b border-outline-variant">
+<button class="w-full py-6 flex justify-between items-center text-left group" onclick="toggleFaq(this)">
+<span class="font-headline-md text-headline-md text-on-background">Puis-je modifier mon régime matrimonial après le mariage ?</span>
+<span class="material-symbols-outlined text-secondary transform transition-transform duration-300">expand_more</span>
+</button>
+<div class="overflow-hidden max-h-0 transition-all duration-300">
+<p class="font-body-md text-body-md text-on-surface-variant pb-6 pr-12">
+                        Oui, il est possible de modifier ou de changer de régime matrimonial après deux années d'application du régime initial. Cette modification doit obligatoirement être constatée par un acte notarié.
+                    </p>
+</div>
+</div>
+<!-- FAQ Item 4 -->
+<div class="border-b border-outline-variant">
+<button class="w-full py-6 flex justify-between items-center text-left group" onclick="toggleFaq(this)">
+<span class="font-headline-md text-headline-md text-on-background">Comment se calcule la part de chaque héritier ?</span>
+<span class="material-symbols-outlined text-secondary transform transition-transform duration-300">expand_more</span>
+</button>
+<div class="overflow-hidden max-h-0 transition-all duration-300">
+<p class="font-body-md text-body-md text-on-surface-variant pb-6 pr-12">
+                        Le calcul s'effectue selon les règles strictes du droit successoral marocain (Code de la famille). Le notaire établit l'acte de notoriété, dresse l'inventaire des biens, et procède à la répartition légale (fara'id) garantissant les droits de chacun.
+                    </p>
+</div>
+</div>
+</div>
+</section>
+<!-- 8. Booking CTA Banner -->
+<section class="bg-on-background text-surface py-16 md:py-section-v-rhythm-min px-gutter" id="reserver">
+<div class="max-w-3xl mx-auto text-center">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg mb-6 text-surface">
+                Réservez votre consultation familiale
+            </h2>
+<p class="font-body-lg text-body-lg text-surface/80 mb-10 max-w-2xl mx-auto">
+                Bénéficiez d'un accompagnement sur-mesure et d'une expertise notariale reconnue pour protéger les intérêts de votre famille.
+            </p>
+<a class="h-12 bg-secondary text-on-secondary px-8 rounded-lg font-label-md text-label-md inline-flex items-center justify-center hover:bg-secondary/90 transition-colors" href="#">
+                Prendre rendez-vous
+            </a>
+</div>
+</section>
+<!-- 9. Footer -->
+<footer class="bg-tertiary-container dark:bg-tertiary w-full py-section-v-rhythm-min border-t-3 border-secondary">
+<div class="flex flex-col md:flex-row justify-between items-start px-gutter max-w-max-width mx-auto gap-8">
+<div class="flex flex-col gap-4">
+<a class="font-display-lg text-headline-md text-surface dark:text-surface-bright italic" href="#">
+                    Maître Sana Bouhamidi
+                </a>
+<p class="font-body-md text-body-md text-surface dark:text-surface-bright max-w-sm">
+                    © 2024 Maître Sana Bouhamidi. Tous droits réservés. Étude Notariale de Casablanca.
+                </p>
+</div>
+<nav class="flex flex-col md:flex-row gap-6 mt-6 md:mt-0">
+<a class="font-label-md text-label-md text-surface-variant dark:text-tertiary-fixed-dim hover:text-secondary-fixed-dim transition-colors duration-300 focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:outline-none rounded" href="#">
+                    Mentions Légales
+                </a>
+<a class="font-label-md text-label-md text-surface-variant dark:text-tertiary-fixed-dim hover:text-secondary-fixed-dim transition-colors duration-300 focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:outline-none rounded" href="#">
+                    Politique de Confidentialité
+                </a>
+<a class="font-label-md text-label-md text-surface-variant dark:text-tertiary-fixed-dim hover:text-secondary-fixed-dim transition-colors duration-300 focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:outline-none rounded" href="#">
+                    Plan du site
+                </a>
+</nav>
+</div>
+</footer>
+<!-- JS for interactive elements -->
+<script>
+        function toggleFaq(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('span.material-symbols-outlined');
+            
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+    </script>
+</body></html>

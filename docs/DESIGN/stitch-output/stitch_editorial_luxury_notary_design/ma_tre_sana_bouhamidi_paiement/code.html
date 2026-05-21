@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Paiement - Étude Bouhamidi</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#44474c",
+                        "secondary-container": "#fcc977",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e8e2d6",
+                        "tertiary": "#000000",
+                        "surface-container-low": "#faf3e7",
+                        "on-secondary-fixed": "#281900",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#c9c6c0",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#1e1b14",
+                        "on-primary-fixed": "#0f1c2d",
+                        "on-tertiary-fixed-variant": "#484742",
+                        "outline-variant": "#c5c6cd",
+                        "surface-bright": "#fff8ef",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e8e2d6",
+                        "on-error-container": "#93000a",
+                        "background": "#fff8ef",
+                        "secondary-fixed-dim": "#f0be6d",
+                        "surface-dim": "#e0d9ce",
+                        "on-primary-fixed-variant": "#3b475a",
+                        "on-primary-container": "#78859a",
+                        "inverse-primary": "#bac7de",
+                        "tertiary-container": "#1c1c18",
+                        "primary": "#000000",
+                        "on-secondary-fixed-variant": "#604100",
+                        "surface-container-high": "#eee7dc",
+                        "surface-container": "#f4ede1",
+                        "surface": "#fff8ef",
+                        "tertiary-fixed": "#e6e2db",
+                        "on-secondary-container": "#775307",
+                        "secondary": "#7d570d",
+                        "on-surface": "#1e1b14",
+                        "primary-container": "#0f1c2d",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#1c1c18",
+                        "inverse-surface": "#333028",
+                        "secondary-fixed": "#ffdead",
+                        "outline": "#75777d",
+                        "inverse-on-surface": "#f7f0e4",
+                        "primary-fixed-dim": "#bac7de",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#535f73",
+                        "on-tertiary-container": "#86847e",
+                        "primary-fixed": "#d6e3fb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "max-width": "1240px",
+                        "margin-mobile": "16px",
+                        "section-v-rhythm-min": "96px",
+                        "gutter": "24px",
+                        "base-unit": "8px",
+                        "section-v-rhythm-max": "128px"
+                    },
+                    "fontFamily": {
+                        "caption": ["inter"],
+                        "body-lg": ["inter"],
+                        "display-lg-mobile": ["ebGaramond"],
+                        "headline-md": ["ebGaramond"],
+                        "headline-lg": ["ebGaramond"],
+                        "label-md": ["inter"],
+                        "display-lg": ["ebGaramond"],
+                        "body-md": ["inter"]
+                    },
+                    "fontSize": {
+                        "caption": ["13px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-lg-mobile": ["40px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "headline-md": ["32px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "headline-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Shared Styles for Editorial Luxury Theme */
+        .brass-accent-top {
+            border-top: 3px solid #7d570d; /* secondary color */
+        }
+        .brass-accent-left {
+            border-left: 3px solid #7d570d;
+        }
+        .hairline-border {
+            border: 1px solid #75777d; /* outline color for stone hairline */
+        }
+        .input-focus-ring:focus-within {
+            border-color: #1e1b14; /* Ink / on-surface */
+            outline: 2px solid #7d570d; /* Brass outer ring */
+            outline-offset: 2px;
+        }
+        
+        /* Floating Label CSS */
+        .floating-input {
+            position: relative;
+        }
+        .floating-input input {
+            padding: 24px 16px 8px 16px;
+        }
+        .floating-input label {
+            position: absolute;
+            top: 50%;
+            left: 16px;
+            transform: translateY(-50%);
+            transition: all 0.2s ease;
+            pointer-events: none;
+            color: #75777d; /* outline */
+        }
+        .floating-input input:focus ~ label,
+        .floating-input input:not(:placeholder-shown) ~ label {
+            top: 12px;
+            font-size: 11px;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col">
+<!-- Header (Slim Progress Bar) -->
+<header class="w-full sticky top-0 z-50 bg-surface-bright border-b border-outline-variant">
+<div class="max-w-max-width mx-auto px-gutter h-20 flex flex-col justify-center">
+<div class="flex justify-between items-center mb-2">
+<a class="font-headline-md text-headline-md font-medium text-on-surface" href="#">Étude Bouhamidi</a>
+<button aria-label="Fermer" class="text-on-surface-variant hover:text-secondary transition-colors duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">close</span>
+</button>
+</div>
+<!-- Progress Bar -->
+<div class="flex items-center gap-2">
+<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-full"></div>
+</div>
+<span class="font-label-md text-label-md text-secondary">Étape 3 : Paiement</span>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow max-w-max-width mx-auto px-gutter w-full py-16 lg:py-24">
+<!-- Page Title -->
+<div class="mb-12">
+<h1 class="font-display-lg text-display-lg-mobile lg:text-display-lg text-on-surface mb-4">Paiement</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Veuillez sélectionner votre méthode de paiement pour finaliser la réservation de votre consultation.</p>
+</div>
+<div class="flex flex-col lg:flex-row gap-12">
+<!-- Left Column: Payment Methods (65%) -->
+<div class="w-full lg:w-[65%] space-y-6">
+<!-- Selected Card: Carte bancaire -->
+<div class="bg-surface-container-lowest rounded-xl hairline-border brass-accent-top p-6 lg:p-8 transition-all duration-300">
+<label class="flex items-start cursor-pointer group">
+<div class="flex-items-center justify-center pt-1 mr-4">
+<input checked="" class="w-5 h-5 text-secondary border-outline focus:ring-secondary focus:ring-offset-surface-container-lowest" name="payment_method" type="radio"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-2">
+<span class="font-headline-md text-[24px] text-on-surface font-medium">Carte bancaire</span>
+<span class="material-symbols-outlined text-secondary text-3xl" style="font-variation-settings: 'FILL' 0;">credit_card</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Paiement sécurisé via Stripe.</p>
+<!-- Card Input Fields -->
+<div class="space-y-4">
+<div class="floating-input hairline-border rounded-lg bg-surface-container-lowest input-focus-ring overflow-hidden">
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface h-12" id="card_number" placeholder=" " required="" type="text"/>
+<label class="font-body-md" for="card_number">Numéro de carte</label>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1">
+<span class="material-symbols-outlined text-outline" style="font-variation-settings: 'FILL' 1;">credit_card</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="floating-input hairline-border rounded-lg bg-surface-container-lowest input-focus-ring overflow-hidden flex-1">
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface h-12" id="expiry" placeholder=" " required="" type="text"/>
+<label class="font-body-md" for="expiry">MM/AA</label>
+</div>
+<div class="floating-input hairline-border rounded-lg bg-surface-container-lowest input-focus-ring overflow-hidden flex-1">
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface h-12" id="cvc" placeholder=" " required="" type="text"/>
+<label class="font-body-md" for="cvc">CVC</label>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 text-outline cursor-help" title="Code à 3 chiffres au dos de la carte">
+<span class="material-symbols-outlined text-[18px]">help</span>
+</div>
+</div>
+</div>
+<div class="floating-input hairline-border rounded-lg bg-surface-container-lowest input-focus-ring overflow-hidden">
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface h-12" id="card_name" placeholder=" " required="" type="text"/>
+<label class="font-body-md" for="card_name">Nom sur la carte</label>
+</div>
+</div>
+<!-- Trust Signals -->
+<div class="mt-6 pt-6 border-t border-surface-variant flex items-center flex-wrap gap-4 font-caption text-caption text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span>Paiement sécurisé</span>
+</div>
+<span class="hidden sm:inline text-outline-variant">•</span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span>3D Secure</span>
+</div>
+<span class="hidden sm:inline text-outline-variant">•</span>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">shield</span>
+<span>Données chiffrées</span>
+</div>
+</div>
+</div>
+</label>
+</div>
+<!-- Unselected Card: Paiement au cabinet -->
+<div class="bg-surface-container-lowest rounded-xl hairline-border p-6 lg:p-8 hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+<label class="flex items-start cursor-pointer group">
+<div class="flex-items-center justify-center pt-1 mr-4">
+<input class="w-5 h-5 text-secondary border-outline focus:ring-secondary focus:ring-offset-surface-container-lowest" name="payment_method" type="radio"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-2">
+<span class="font-headline-md text-[24px] text-on-surface font-medium group-hover:text-secondary transition-colors">Paiement au cabinet</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary transition-colors text-3xl" style="font-variation-settings: 'FILL' 0;">wallet</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Réglez en espèces lors de votre rendez-vous au cabinet à Bensergao.</p>
+</div>
+</label>
+</div>
+</div>
+<!-- Right Column: Summary Sticky Card (35%) -->
+<div class="w-full lg:w-[35%] relative">
+<div class="sticky top-28 bg-surface-container-low rounded-xl hairline-border p-8 flex flex-col">
+<h3 class="font-headline-md text-[24px] text-on-surface font-medium mb-6">Récapitulatif</h3>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between items-start border-b border-surface-variant pb-4">
+<div>
+<span class="block font-label-md text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Service</span>
+<span class="font-body-lg text-body-lg text-on-surface">Consultation Juridique Initiale</span>
+</div>
+</div>
+<div class="flex justify-between items-start border-b border-surface-variant pb-4">
+<div>
+<span class="block font-label-md text-label-md text-on-surface-variant mb-1 uppercase tracking-wider">Date &amp; Heure</span>
+<span class="font-body-lg text-body-lg text-on-surface">Jeudi 24 Octobre 2024<br/>10:00 - 11:00</span>
+</div>
+<button aria-label="Modifier la date" class="text-secondary hover:underline font-label-md text-caption">Modifier</button>
+</div>
+<div class="flex justify-between items-center pt-2">
+<span class="font-headline-md text-[20px] text-on-surface">Total à régler</span>
+<span class="font-display-lg text-[32px] text-on-surface">1 500 DH</span>
+</div>
+</div>
+<button class="w-full h-12 bg-secondary text-on-primary rounded-lg font-label-md text-label-md hover:bg-on-secondary-container transition-colors duration-200 mb-6 flex items-center justify-center gap-2">
+<span>Confirmer et payer</span>
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</button>
+<p class="font-caption text-caption text-on-surface-variant text-center">
+                        En confirmant, vous acceptez nos <a class="text-secondary hover:underline" href="#">Conditions Générales</a> et notre <a class="text-secondary hover:underline" href="#">Politique d'annulation</a>.
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-high w-full py-12 border-t border-outline-variant">
+<div class="max-w-max-width mx-auto px-gutter flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<span class="font-headline-md text-[24px] text-primary">Étude Bouhamidi</span>
+<nav class="flex flex-wrap gap-x-6 gap-y-2">
+<a class="font-caption text-caption text-on-surface-variant hover:text-secondary transition-colors" href="#">Mentions Légales</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-secondary transition-colors" href="#">Politique de Confidentialité</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-secondary transition-colors" href="#">Honoraires</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-secondary transition-colors" href="#">Plan du site</a>
+</nav>
+<p class="font-caption text-caption text-on-surface-variant">
+                © 2024 Maître Sana Bouhamidi. Tous droits réservés. Notaire à Casablanca.
+            </p>
+</div>
+</footer>
+</body></html>

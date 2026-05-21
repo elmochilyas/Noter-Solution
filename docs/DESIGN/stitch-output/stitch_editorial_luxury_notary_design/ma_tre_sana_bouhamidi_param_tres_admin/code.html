@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Paramètres - Étude Notariale</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#fcc977",
+                        "on-secondary-fixed": "#281900",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#ffdead",
+                        "background": "#fff8ef",
+                        "on-tertiary-fixed-variant": "#484742",
+                        "surface-container-highest": "#e8e2d6",
+                        "surface": "#fff8ef",
+                        "secondary-fixed-dim": "#f0be6d",
+                        "primary-container": "#0f1c2d",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#faf3e7",
+                        "surface-variant": "#e8e2d6",
+                        "on-surface": "#1e1b14",
+                        "on-primary-container": "#78859a",
+                        "inverse-primary": "#bac7de",
+                        "on-primary-fixed-variant": "#3b475a",
+                        "surface-dim": "#e0d9ce",
+                        "outline": "#75777d",
+                        "secondary": "#7d570d",
+                        "primary": "#000000",
+                        "surface-container-high": "#eee7dc",
+                        "on-background": "#1e1b14",
+                        "on-secondary-fixed-variant": "#604100",
+                        "inverse-surface": "#333028",
+                        "on-secondary-container": "#775307",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#d6e3fb",
+                        "tertiary": "#000000",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#86847e",
+                        "on-primary-fixed": "#0f1c2d",
+                        "surface-bright": "#fff8ef",
+                        "on-tertiary-fixed": "#1c1c18",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#1c1c18",
+                        "surface-container": "#f4ede1",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#44474c",
+                        "primary-fixed-dim": "#bac7de",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#e6e2db",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#535f73",
+                        "outline-variant": "#c5c6cd",
+                        "tertiary-fixed-dim": "#c9c6c0",
+                        "inverse-on-surface": "#f7f0e4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "section-v-rhythm-max": "128px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "section-v-rhythm-min": "96px",
+                        "max-width": "1240px",
+                        "base-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["EB Garamond", "serif"],
+                        "caption": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "headline-md": ["EB Garamond", "serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "display-lg-mobile": ["EB Garamond", "serif"],
+                        "headline-lg": ["EB Garamond", "serif"],
+                        "label-md": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "caption": ["13px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-md": ["32px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "display-lg-mobile": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "headline-lg": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            stroke-width: 1.5px;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen fixed left-0 top-0 w-64 border-r border-outline-variant bg-surface-container-low dark:bg-surface-container-low z-40">
+<div class="p-8 pb-12 border-b border-outline-variant">
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary uppercase tracking-widest mb-2">Étude Notariale</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Casablanca, Maroc</p>
+</div>
+<div class="flex-1 py-6 overflow-y-auto">
+<ul class="space-y-2">
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant font-medium pl-5 py-3 hover:bg-surface-container-high hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Tableau de bord</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant font-medium pl-5 py-3 hover:bg-surface-container-high hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span>Calendrier</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant font-medium pl-5 py-3 hover:bg-surface-container-high hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">event_available</span>
+<span>Disponibilités</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant font-medium pl-5 py-3 hover:bg-surface-container-high hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">event_note</span>
+<span>Rendez-vous</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant font-medium pl-5 py-3 hover:bg-surface-container-high hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Clients</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant font-medium pl-5 py-3 hover:bg-surface-container-high hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Contenu</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-on-surface-variant font-medium pl-5 py-3 hover:bg-surface-container-high hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span>Assistant</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-4 text-primary font-bold border-l-4 border-secondary pl-4 py-3 bg-surface-container-highest transition-colors duration-300" href="#">
+<span class="material-symbols-outlined fill">settings</span>
+<span>Paramètres</span>
+</a>
+</li>
+</ul>
+</div>
+<div class="p-6 border-t border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+<div>
+<p class="font-body-md text-body-md font-medium text-primary">Me. Bouhamidi</p>
+<p class="font-caption text-caption text-on-surface-variant">Notaire</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-0 md:ml-64 min-h-screen bg-background">
+<!-- Header -->
+<header class="h-32 px-10 flex items-end pb-8 border-b border-outline-variant bg-surface-container-lowest">
+<h2 class="font-headline-lg text-headline-lg text-primary">Paramètres</h2>
+</header>
+<div class="max-w-[1240px] mx-auto p-10 grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Settings Sub-nav -->
+<aside class="col-span-1 md:col-span-3 lg:col-span-2">
+<nav class="sticky top-10 flex flex-col gap-1">
+<a class="px-4 py-3 text-primary border-l-[3px] border-secondary bg-surface-container-highest font-medium transition-colors" href="#">Cabinet</a>
+<a class="px-4 py-3 text-on-surface-variant border-l-[3px] border-transparent hover:border-outline-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="#">Facturation</a>
+<a class="px-4 py-3 text-on-surface-variant border-l-[3px] border-transparent hover:border-outline-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="#">Notifications</a>
+<a class="px-4 py-3 text-on-surface-variant border-l-[3px] border-transparent hover:border-outline-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="#">Paiements</a>
+<a class="px-4 py-3 text-on-surface-variant border-l-[3px] border-transparent hover:border-outline-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="#">Utilisateurs</a>
+<a class="px-4 py-3 text-on-surface-variant border-l-[3px] border-transparent hover:border-outline-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="#">Sécurité</a>
+<a class="px-4 py-3 text-on-surface-variant border-l-[3px] border-transparent hover:border-outline-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="#">Confidentialité</a>
+</nav>
+</aside>
+<!-- Settings Content -->
+<div class="col-span-1 md:col-span-9 lg:col-span-10 space-y-12 pb-24">
+<!-- Identité Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden relative">
+<div class="absolute top-0 left-0 w-full h-[3px] bg-secondary"></div>
+<div class="p-8 border-b border-outline-variant">
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Identité</h3>
+<p class="text-on-surface-variant">Les informations principales de l'étude, affichées sur les documents officiels.</p>
+</div>
+<div class="p-8 space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Nom du cabinet</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary" type="text" value="Maître Sana Bouhamidi"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Email de contact</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary" type="email" value="contact@etudebouhamidi.ma"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Adresse complète</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary mb-3" type="text" value="145 Boulevard d'Anfa, Résidence Le Dôme, 3ème étage"/>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary col-span-2" placeholder="Ville" type="text" value="Casablanca"/>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary" placeholder="Code Postal" type="text" value="20050"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface uppercase tracking-wider flex items-center justify-between">
+                                Téléphones
+                                <button class="text-secondary hover:text-on-secondary-container transition-colors flex items-center gap-1 text-xs">
+<span class="material-symbols-outlined text-sm">add</span> Ajouter
+                                </button>
+</label>
+<div class="flex gap-4 items-center">
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary" type="tel" value="+212 5 22 45 67 89"/>
+<button class="h-12 w-12 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface-variant hover:text-error hover:border-error transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<div class="flex gap-4 items-center">
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary" type="tel" value="+212 6 61 23 45 67"/>
+<button class="h-12 w-12 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface-variant hover:text-error hover:border-error transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+<div class="p-6 border-t border-outline-variant bg-surface-container-low flex justify-end">
+<button class="h-12 px-8 rounded-lg bg-secondary text-on-primary font-medium hover:bg-on-secondary-container transition-colors shadow-sm">
+                            Enregistrer les modifications
+                        </button>
+</div>
+</section>
+<!-- Identifiants Légaux Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+<div class="p-8 border-b border-outline-variant">
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Identifiants légaux</h3>
+<p class="text-on-surface-variant">Numéros d'identification de l'étude requis pour la facturation et les actes.</p>
+</div>
+<div class="p-8 space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface uppercase tracking-wider">I.C.E (Identifiant Commun de l'Entreprise)</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary font-mono" type="text" value="001234567000089"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Identifiant Fiscal (I.F)</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary font-mono" type="text" value="12345678"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Registre de Commerce (R.C)</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary font-mono" type="text" value="98765"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Taxe Professionnelle (Patente)</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-transparent focus:border-primary focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-shadow outline-none text-primary font-mono" type="text" value="34567890"/>
+</div>
+</div>
+</div>
+<div class="p-6 border-t border-outline-variant bg-surface-container-low flex justify-end">
+<button class="h-12 px-8 rounded-lg bg-secondary text-on-primary font-medium hover:bg-on-secondary-container transition-colors shadow-sm">
+                            Enregistrer les identifiants
+                        </button>
+</div>
+</section>
+<!-- Heures & Media Split -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Heures d'ouverture -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col">
+<div class="p-8 border-b border-outline-variant">
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Heures d'ouverture</h3>
+<p class="text-on-surface-variant">Visibles sur le portail client.</p>
+</div>
+<div class="p-8 flex-1 flex flex-col justify-center items-center text-center space-y-4">
+<div class="w-16 h-16 rounded-full bg-surface-container-low border border-outline-variant flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-3xl text-secondary">schedule</span>
+</div>
+<p class="text-primary font-medium">Lundi - Vendredi : 09h00 - 18h00</p>
+<p class="text-on-surface-variant text-sm">Actuellement configuré sur un horaire continu standard.</p>
+<a class="mt-4 inline-flex items-center gap-2 text-secondary font-medium hover:text-on-secondary-container transition-colors" href="#">
+                                Gérer les horaires d'ouverture <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+</section>
+<!-- Logo et Favicon -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col">
+<div class="p-8 border-b border-outline-variant">
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Logo et favicon</h3>
+<p class="text-on-surface-variant">Identité visuelle numérique.</p>
+</div>
+<div class="p-8 space-y-6 flex-1">
+<div class="space-y-3">
+<label class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Logo Principal</label>
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-4xl text-outline mb-2 group-hover:text-secondary transition-colors">upload_file</span>
+<p class="text-primary font-medium">Glissez-déposez ou <span class="text-secondary">parcourez</span></p>
+<p class="text-xs text-on-surface-variant mt-1">PNG, JPG ou SVG (Max. 2MB)</p>
+</div>
+</div>
+<hr class="border-outline-variant"/>
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 rounded-lg border border-outline-variant bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-outline">gavel</span>
+</div>
+<div class="space-y-1">
+<label class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Favicon Actuel</label>
+<div class="flex gap-3 mt-2">
+<button class="text-sm font-medium text-secondary hover:text-on-secondary-container">Remplacer</button>
+<button class="text-sm font-medium text-error hover:text-on-error-container">Supprimer</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+</body></html>

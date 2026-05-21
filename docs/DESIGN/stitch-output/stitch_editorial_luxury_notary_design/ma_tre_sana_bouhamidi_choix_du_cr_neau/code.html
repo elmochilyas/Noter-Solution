@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Prendre rendez-vous - Étude Bouhamidi</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#eee7dc",
+                        "on-secondary-fixed-variant": "#604100",
+                        "surface-bright": "#fff8ef",
+                        "outline": "#75777d",
+                        "on-surface": "#1e1b14",
+                        "surface-container-low": "#faf3e7",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#1c1c18",
+                        "tertiary": "#000000",
+                        "inverse-on-surface": "#f7f0e4",
+                        "primary-container": "#0f1c2d",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#86847e",
+                        "inverse-surface": "#333028",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#bac7de",
+                        "on-tertiary-fixed-variant": "#484742",
+                        "surface-container": "#f4ede1",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#1c1c18",
+                        "tertiary-fixed-dim": "#c9c6c0",
+                        "surface-dim": "#e0d9ce",
+                        "surface-container-highest": "#e8e2d6",
+                        "primary-fixed": "#d6e3fb",
+                        "on-background": "#1e1b14",
+                        "on-primary-fixed-variant": "#3b475a",
+                        "on-error-container": "#93000a",
+                        "background": "#fff8ef",
+                        "secondary": "#7d570d",
+                        "tertiary-fixed": "#e6e2db",
+                        "primary": "#000000",
+                        "outline-variant": "#c5c6cd",
+                        "on-surface-variant": "#44474c",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#78859a",
+                        "surface-tint": "#535f73",
+                        "on-secondary-fixed": "#281900",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e8e2d6",
+                        "primary-fixed-dim": "#bac7de",
+                        "on-primary-fixed": "#0f1c2d",
+                        "secondary-fixed": "#ffdead",
+                        "secondary-fixed-dim": "#f0be6d",
+                        "surface": "#fff8ef",
+                        "secondary-container": "#fcc977",
+                        "on-secondary-container": "#775307"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "max-width": "1240px",
+                        "gutter": "24px",
+                        "section-v-rhythm-max": "128px",
+                        "margin-mobile": "16px",
+                        "section-v-rhythm-min": "96px",
+                        "base-unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["EB Garamond", "serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "caption": ["Inter", "sans-serif"],
+                        "display-lg": ["EB Garamond", "serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "headline-lg": ["EB Garamond", "serif"],
+                        "label-md": ["Inter", "sans-serif"],
+                        "display-lg-mobile": ["EB Garamond", "serif"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["32px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "caption": ["13px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "display-lg": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg-mobile": ["40px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .brass-accent { background-color: #8b6f23; }
+        .brass-text { color: #8b6f23; }
+        .brass-border { border-color: #8b6f23; }
+        .ink-text { color: #0e1b2c; }
+        .ink-border { border-color: #0e1b2c; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md text-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-surface-bright dark:bg-surface-dim w-full sticky top-0 z-50 border-b border-outline-variant dark:border-outline">
+<div class="max-w-max-width mx-auto px-gutter flex justify-between items-center h-20">
+<a class="font-headline-md text-headline-md font-medium text-on-surface dark:text-inverse-on-surface" href="#">Étude Bouhamidi</a>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">Expertises</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">L’Étude</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">Actualités</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">Contact</a>
+</div>
+<a class="hidden md:inline-flex items-center justify-center h-12 px-6 rounded-DEFAULT bg-primary text-on-primary hover:bg-opacity-90 transition-opacity font-label-md text-label-md" href="#">
+                Prendre rendez-vous
+            </a>
+<button class="md:hidden text-on-surface p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</nav>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container-high border-b border-outline-variant py-4">
+<div class="max-w-max-width mx-auto px-gutter flex justify-center items-center space-x-4 md:space-x-8 text-sm md:text-base">
+<div class="flex items-center space-x-2 brass-text font-medium">
+<span>1. Créneau</span>
+</div>
+<span class="text-outline-variant">•</span>
+<div class="flex items-center space-x-2 text-on-surface-variant">
+<span>2. Informations</span>
+</div>
+<span class="text-outline-variant">•</span>
+<div class="flex items-center space-x-2 text-on-surface-variant">
+<span>3. Paiement</span>
+</div>
+</div>
+</div>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-max-width mx-auto px-gutter py-12 md:py-16">
+<!-- Header -->
+<div class="mb-12 text-center md:text-left">
+<p class="font-label-md text-label-md uppercase tracking-widest brass-text mb-4">Réservation</p>
+<h1 class="font-headline-lg text-headline-lg md:font-display-lg md:text-display-lg ink-text">Choisissez votre créneau</h1>
+</div>
+<div class="flex flex-col lg:flex-row gap-12">
+<!-- Left Column: Calendar View (65%) -->
+<div class="w-full lg:w-[65%] space-y-8">
+<!-- Controls -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-outline-variant">
+<!-- Month Nav -->
+<div class="flex items-center space-x-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant hover:border-ink transition-colors">
+<span class="material-symbols-outlined brass-text">chevron_left</span>
+</button>
+<span class="font-headline-md text-headline-md min-w-[120px] text-center">Mai 2024</span>
+<button class="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant hover:border-ink transition-colors">
+<span class="material-symbols-outlined brass-text">chevron_right</span>
+</button>
+</div>
+<!-- Type & Format -->
+<div class="flex flex-col gap-3 w-full sm:w-auto">
+<select class="h-12 px-4 rounded-DEFAULT border border-outline-variant bg-surface focus:border-ink focus:ring-1 focus:ring-ink text-sm appearance-none pr-10 relative">
+<option>Consultation standard en ligne — 30 min</option>
+<option>Consultation au cabinet — 1h</option>
+</select>
+<!-- Segmented Control -->
+<div class="flex p-1 bg-surface-container-high rounded-DEFAULT border border-outline-variant">
+<button class="flex-1 py-2 px-4 text-sm font-medium bg-surface rounded shadow-sm">En ligne</button>
+<button class="flex-1 py-2 px-4 text-sm text-on-surface-variant hover:text-on-surface transition-colors">Au cabinet</button>
+</div>
+</div>
+</div>
+<!-- Weekly Calendar Grid -->
+<div class="overflow-x-auto pb-4">
+<div class="min-w-[600px] grid grid-cols-5 gap-4">
+<!-- Day 1 -->
+<div class="flex flex-col">
+<div class="text-center mb-6">
+<p class="text-sm text-on-surface-variant uppercase mb-1">Lun</p>
+<p class="font-headline-md text-headline-md">20</p>
+</div>
+<div class="space-y-3">
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">09:00</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">10:30</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface-container-highest text-outline line-through cursor-not-allowed text-sm" disabled="">11:00</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">14:00</button>
+</div>
+</div>
+<!-- Day 2 -->
+<div class="flex flex-col">
+<div class="text-center mb-6">
+<p class="text-sm text-on-surface-variant uppercase mb-1">Mar</p>
+<p class="font-headline-md text-headline-md">21</p>
+</div>
+<div class="space-y-3">
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface-container-highest text-outline line-through cursor-not-allowed text-sm" disabled="">09:30</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">11:00</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">15:30</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">16:00</button>
+</div>
+</div>
+<!-- Day 3 -->
+<div class="flex flex-col">
+<div class="text-center mb-6">
+<p class="text-sm text-on-surface-variant uppercase mb-1">Mer</p>
+<p class="font-headline-md text-headline-md">22</p>
+</div>
+<div class="space-y-3">
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">09:00</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">10:00</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">11:30</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface-container-highest text-outline line-through cursor-not-allowed text-sm" disabled="">14:30</button>
+</div>
+</div>
+<!-- Day 4 -->
+<div class="flex flex-col">
+<div class="text-center mb-6">
+<p class="text-sm text-on-surface-variant uppercase mb-1">Jeu</p>
+<p class="font-headline-md text-headline-md">23</p>
+</div>
+<div class="space-y-3">
+<div class="text-center py-4 text-sm text-outline-variant italic border border-transparent">
+                                    Aucun créneau
+                                </div>
+</div>
+</div>
+<!-- Day 5 (Selected) -->
+<div class="flex flex-col">
+<div class="text-center mb-6">
+<p class="text-sm text-on-surface-variant uppercase mb-1">Ven</p>
+<p class="font-headline-md text-headline-md">24</p>
+</div>
+<div class="space-y-3">
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">09:00</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">10:30</button>
+<button class="w-full py-3 text-center border-transparent rounded-DEFAULT brass-accent text-surface shadow-sm font-medium text-sm">14:30</button>
+<button class="w-full py-3 text-center border border-outline-variant rounded-DEFAULT bg-surface hover:border-ink transition-colors text-sm">16:00</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Summary Card (35%) -->
+<div class="w-full lg:w-[35%]">
+<div class="sticky top-28 bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+<div class="h-[3px] brass-accent w-full"></div>
+<div class="p-6 md:p-8 space-y-6">
+<div>
+<h3 class="font-headline-md text-headline-md mb-2">Récapitulatif</h3>
+<p class="text-on-surface-variant text-sm">Veuillez vérifier les détails de votre rendez-vous avant de continuer.</p>
+</div>
+<div class="space-y-4 py-6 border-t border-b border-outline-variant">
+<div>
+<p class="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Service</p>
+<p class="font-medium">Consultation standard en ligne</p>
+<p class="text-sm text-on-surface-variant">Durée : 30 min</p>
+</div>
+<div>
+<p class="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Date &amp; Heure</p>
+<p class="font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] brass-text">calendar_today</span>
+                                    Vendredi 24 Mai, 14:30
+                                </p>
+</div>
+<div class="pt-2">
+<div class="flex justify-between items-center">
+<p class="text-sm text-on-surface-variant">Montant de la réservation</p>
+<p class="font-headline-md text-[24px]">250 MAD</p>
+</div>
+</div>
+</div>
+<div class="pt-2">
+<button class="w-full h-12 flex items-center justify-center rounded-DEFAULT brass-accent text-surface hover:opacity-90 transition-opacity font-label-md text-label-md mb-4">
+                                Continuer vers les informations
+                            </button>
+<div class="text-center">
+<a class="text-xs text-outline hover:text-on-surface transition-colors underline decoration-outline-variant underline-offset-4" href="#">Politique d'annulation</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Compact -->
+<footer class="bg-surface-container-high dark:bg-surface-container-lowest border-t border-outline-variant w-full py-8 mt-auto">
+<div class="max-w-max-width mx-auto px-gutter flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="font-headline-md text-headline-md text-primary dark:text-primary-fixed text-lg">
+                Étude Bouhamidi
+            </div>
+<div class="flex flex-wrap justify-center gap-6 text-sm">
+<a class="text-on-surface-variant hover:text-secondary transition-colors" href="#">Mentions Légales</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors" href="#">Politique de Confidentialité</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors" href="#">Honoraires</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors" href="#">Plan du site</a>
+</div>
+<div class="text-xs text-on-surface-variant text-center md:text-right">
+                © 2024 Maître Sana Bouhamidi. Tous droits réservés. Notaire à Casablanca.
+            </div>
+</div>
+</footer>
+</body></html>
