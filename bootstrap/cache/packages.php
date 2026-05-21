@@ -31,4 +31,14 @@ return [
             0 => 'Termwind\\Laravel\\TermwindServiceProvider',
         ],
     ],
+    'spatie/laravel-activitylog' => [
+        'providers' => [
+            0 => 'Spatie\\Activitylog\\ActivitylogServiceProvider',
+        ],
+    ],
+    'spatie/laravel-permission' => [
+        'providers' => [
+            0 => 'Spatie\\Permission\\PermissionServiceProvider',
+        ],
+    ],
 ];

@@ -31,7 +31,9 @@ return [
         26 => 'Carbon\\Laravel\\ServiceProvider',
         27 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
         28 => 'Termwind\\Laravel\\TermwindServiceProvider',
-        29 => 'App\\Providers\\AppServiceProvider',
+        29 => 'Spatie\\Activitylog\\ActivitylogServiceProvider',
+        30 => 'Spatie\\Permission\\PermissionServiceProvider',
+        31 => 'App\\Providers\\AppServiceProvider',
     ],
     'eager' => [
         0 => 'Illuminate\\Auth\\AuthServiceProvider',
@@ -49,7 +51,9 @@ return [
         12 => 'Carbon\\Laravel\\ServiceProvider',
         13 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
         14 => 'Termwind\\Laravel\\TermwindServiceProvider',
-        15 => 'App\\Providers\\AppServiceProvider',
+        15 => 'Spatie\\Activitylog\\ActivitylogServiceProvider',
+        16 => 'Spatie\\Permission\\PermissionServiceProvider',
+        17 => 'App\\Providers\\AppServiceProvider',
     ],
     'deferred' => [
         'Illuminate\\Broadcasting\\BroadcastManager' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
