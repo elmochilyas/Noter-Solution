@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('currency', 3);
             $table->string('status', 20);
             $table->timestamp('paid_at')->nullable();
-            $table->jsonb('metadata');
+            $table->jsonb('metadata')->nullable();
             $table->timestamps();
 
             $table->index('booking_id');

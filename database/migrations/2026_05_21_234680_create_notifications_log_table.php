@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('template_key', 64);
             $table->string('status', 16);
             $table->string('provider_message_id', 255)->nullable();
-            $table->jsonb('metadata');
+            $table->jsonb('metadata')->nullable();
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('delivered_at')->nullable();
             $table->timestamp('failed_at')->nullable();

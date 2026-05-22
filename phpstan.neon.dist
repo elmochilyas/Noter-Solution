@@ -1,0 +1,15 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 8
+    paths:
+        - app/
+    excludePaths:
+        - app/Providers/*.php
+        - app/Exceptions/*.php
+    tmpDir: storage/framework/cache/phpstan
+    databaseMigrationsPath:
+        - database/migrations/
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
