@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('client_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('session_id', 128);
             $table->timestamp('expires_at');
-            $table->timestamp('created_at');
+            $table->timestamp('created_at')->useCurrent();
 
             $table->index(['slot_starts_at', 'slot_ends_at']);
             $table->index('expires_at');

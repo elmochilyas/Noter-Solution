@@ -57,4 +57,14 @@ class BookingPolicy
     {
         return $user->isOwner() || $user->isAssistant();
     }
+
+    public function refund(User $user, Booking $booking): bool
+    {
+        return $user->isOwner();
+    }
+
+    public function markCashSucceeded(User $user, Booking $booking): bool
+    {
+        return $user->isOwner() || $user->isAssistant();
+    }
 }

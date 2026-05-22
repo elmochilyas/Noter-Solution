@@ -1,0 +1,75 @@
+<?php
+
+return [
+    'hello' => 'Bonjour',
+    'regards' => 'Cordialement',
+    'signature' => 'Cabinet de Maître Sana Bouhamidi',
+    'booking_confirmed' => [
+        'subject' => 'Confirmation de votre rendez-vous',
+        'line1' => 'Votre rendez-vous a été confirmé. Voici un récapitulatif :',
+        'reference' => 'Référence',
+        'date' => 'Date et heure',
+        'format' => 'Format',
+        'next_steps' => 'Que faire ensuite ?',
+        'video_note' => 'Le lien de visioconférence vous sera envoyé 1 heure avant le rendez-vous.',
+        'office_address' => 'Adresse du cabinet : [Adresse à compléter]',
+        'portal_cta' => 'Accéder à mon espace client',
+        'sms' => 'Confirmation rdv n°:reference le :date - Cabinet Sana Bouhamidi',
+        'whatsapp' => 'Votre rendez-vous n°:reference est confirmé pour le :date. Merci de votre confiance - Cabinet Sana Bouhamidi',
+    ],
+    'booking_reminder_24h' => [
+        'subject' => 'Rappel : votre rendez-vous de demain',
+        'lines' => [
+            'Ceci est un rappel amical pour votre rendez-vous de demain.',
+            'Nous vous attendons au cabinet à l\'heure convenue.',
+        ],
+        'sms' => 'Rappel: rdv n°:reference demain :date - Cabinet Sana Bouhamidi',
+        'whatsapp' => 'Rappel amical: votre rendez-vous n°:reference est prévu demain :date. Merci de confirmer votre présence.',
+    ],
+    'booking_reminder_1h' => [
+        'subject' => 'Rappel : votre rendez-vous dans 1 heure',
+        'lines' => [
+            'Votre rendez-vous commence dans une heure.',
+            'Merci de confirmer votre présence.',
+        ],
+        'sms' => 'Rappel: rdv n°:reference dans 1h - Cabinet Sana Bouhamidi',
+        'whatsapp' => 'Rappel: votre rendez-vous n°:reference commence dans 1 heure. Nous vous attendons.',
+    ],
+    'booking_cancelled' => [
+        'subject' => 'Annulation de votre rendez-vous',
+        'line1' => 'Votre rendez-vous a été annulé.',
+        'rescheduled_note' => 'Un nouveau rendez-vous a été programmé. Vous recevrez une confirmation séparée.',
+        'sms' => 'Annulation rdv n°:reference - Cabinet Sana Bouhamidi',
+        'whatsapp' => 'Votre rendez-vous n°:reference a été annulé. Contactez-nous pour plus d\'informations.',
+    ],
+    'booking_rescheduled' => [
+        'subject' => 'Votre rendez-vous a été reprogrammé',
+        'line1' => 'Votre rendez-vous a été reprogrammé. Voici les nouveaux détails :',
+        'sms' => 'Report: n°:new_ref le :date - Cabinet Sana Bouhamidi',
+        'whatsapp' => 'Votre rendez-vous a été reprogrammé. Nouveau n°:new_ref le :date. Merci de votre compréhension.',
+    ],
+    'payment_receipt' => [
+        'subject' => 'Votre reçu de paiement',
+        'line1' => 'Votre paiement a été confirmé. Vous trouverez ci-dessous les détails de votre reçu.',
+        'number' => 'Reçu n°',
+        'amount' => 'Montant',
+        'attachment_note' => 'Le reçu PDF est disponible en pièce jointe.',
+        'sms' => 'Reçu n°:number de :amount MAD disponible - Cabinet Sana Bouhamidi',
+        'whatsapp' => 'Votre reçu n°:number d\'un montant de :amount MAD est disponible. Merci de votre confiance.',
+    ],
+    'payment_failed' => [
+        'subject' => 'Échec du paiement',
+        'line1' => 'Le paiement de votre rendez-vous a échoué.',
+        'line2' => 'Veuillez réessayer avec une autre carte ou nous contacter pour d\'autres options de paiement.',
+        'sms' => 'Paiement échoué pour rdv n°:reference - Cabinet Sana Bouhamidi',
+        'whatsapp' => 'Le paiement de votre rendez-vous n°:reference a échoué. Veuillez réessayer ou nous contacter.',
+    ],
+    'refund_issued' => [
+        'subject' => 'Remboursement effectué',
+        'line1' => 'Votre remboursement a été traité.',
+        'amount' => 'Montant remboursé',
+        'delay_note' => 'Le délai de réception dépend de votre banque (généralement 3 à 10 jours ouvrés).',
+        'sms' => 'Remboursement de :amount MAD effectué - Cabinet Sana Bouhamidi',
+        'whatsapp' => 'Votre remboursement de :amount MAD a été traité. Le délai de réception dépend de votre banque.',
+    ],
+];

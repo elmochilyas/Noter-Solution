@@ -18,6 +18,7 @@ final readonly class BookingData
         public MoroccanPhoneNumber $clientPhone,
         public string $description,
         public Locale $locale,
+        public int $totalCentimes = 0,
         public array $documents = [],
     ) {}
 }

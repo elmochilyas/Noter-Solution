@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Auth\MagicLinkController;
 use App\Http\Controllers\Public\AboutController;
-use App\Http\Controllers\Public\BookingPlaceholderController;
 use App\Http\Controllers\Public\ConsultationController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\FaqController;
@@ -11,8 +10,19 @@ use App\Http\Controllers\Public\LegalController;
 use App\Http\Controllers\Public\OfficeController;
 use App\Http\Controllers\Public\ServiceDetailController;
 use App\Http\Controllers\Public\ServicesIndexController;
+use App\Http\Controllers\Public\ShortLinkController;
+use App\Http\Controllers\Webhook\ResendWebhookController;
+use App\Http\Controllers\Webhook\StripeWebhookController;
+use App\Http\Controllers\Webhook\TwilioWebhookController;
+use App\Livewire\Booking\CreateBooking;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/webhooks/stripe', StripeWebhookController::class)->name('webhooks.stripe')->middleware('throttle.webhooks');
+Route::post('/webhooks/resend', ResendWebhookController::class)->name('webhooks.resend');
+Route::post('/webhooks/twilio', TwilioWebhookController::class)->name('webhooks.twilio');
+
+Route::get('/s/{hash}', ShortLinkController::class)->name('short-link');
 
 Route::get('/', function () {
     $locale = 'ar';
@@ -47,7 +57,7 @@ Route::prefix('{locale}')->where(['locale' => 'ar|fr'])->middleware('locale')->g
     Route::get('/cabinet', OfficeController::class)->name('office');
     Route::get('/{page}', LegalController::class)->whereIn('page', ['mentions-legales', 'politique-confidentialite', 'conditions-utilisation'])->name('legal.show');
 
-    Route::get('/book', BookingPlaceholderController::class)->name('book');
+    Route::get('/book', CreateBooking::class)->name('book');
 
     // SEO: Sitemap per locale
     Route::get('/sitemap.xml', function () {

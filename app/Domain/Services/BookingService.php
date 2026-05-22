@@ -7,8 +7,10 @@ use App\Enums\BookingFormat;
 use App\Enums\BookingStatus;
 use App\Enums\Locale;
 use App\Enums\ServiceCategory;
+use App\Events\BookingConfirmed;
 use App\Models\Booking;
 use App\Models\Client;
+use App\Models\ConsultationPlan;
 use App\Models\Payment;
 use App\Models\User;
 use App\ValueObjects\BookingData;
@@ -18,10 +20,15 @@ use App\ValueObjects\TimeSlot;
 
 final class BookingService
 {
-    public function createPending(BookingData $data): Booking
+    public function __construct(
+        private readonly AvailabilityService $availability,
+    ) {}
+
+    public function createPending(BookingData $data, ?Client $client = null): Booking
     {
         $booking = new Booking;
         $booking->reference = (string) BookingReference::generate();
+        $booking->client_id = $client?->id;
         $booking->consultation_plan_id = $data->consultationPlanId;
         $booking->service_category = $data->serviceCategory->value;
         $booking->format = $data->format->value;
@@ -29,7 +36,14 @@ final class BookingService
         $booking->ends_at = $data->slot->endsAt;
         $booking->status = BookingStatus::PENDING_PAYMENT->value;
         $booking->description = $data->description;
+        $booking->total_centimes = $data->totalCentimes;
+        $booking->currency = 'MAD';
         $booking->save();
+
+        $plan = ConsultationPlan::find($data->consultationPlanId);
+        if ($plan) {
+            $this->availability->clearSlotsCache($plan, $data->format);
+        }
 
         return $booking;
     }
@@ -43,6 +57,8 @@ final class BookingService
 
         $booking->status = BookingStatus::CONFIRMED->value;
         $booking->save();
+
+        BookingConfirmed::dispatch($booking);
     }
 
     public function complete(Booking $booking): void
@@ -83,6 +99,10 @@ final class BookingService
 
     public function reschedule(Booking $booking, TimeSlot $newSlot): Booking
     {
+        if ($booking->client && $booking->client->hasExceededRescheduleLimit()) {
+            throw new \RuntimeException('Reschedule limit reached. Maximum 2 reschedules per 30 days.');
+        }
+
         $this->cancel($booking, 'rescheduled', $booking->client);
 
         $data = new BookingData(
@@ -95,8 +115,9 @@ final class BookingService
             clientPhone: MoroccanPhoneNumber::fromInput($booking->client->phone),
             description: $booking->description,
             locale: Locale::tryFrom(app()->getLocale()) ?? Locale::FR,
+            totalCentimes: $booking->total_centimes,
         );
 
-        return $this->createPending($data);
+        return $this->createPending($data, $booking->client);
     }
 }

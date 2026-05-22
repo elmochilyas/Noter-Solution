@@ -60,6 +60,13 @@ return [
             'report' => false,
         ],
 
+        'receipts' => [
+            'driver' => 'local',
+            'root' => storage_path('app/receipts'),
+            'url' => env('APP_URL').'/storage/receipts',
+            'visibility' => 'private',
+        ],
+
     ],
 
     /*

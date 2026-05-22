@@ -69,4 +69,9 @@ class Booking extends Model
     {
         return $this->hasOne(Receipt::class);
     }
+
+    public function creditNotes(): HasMany
+    {
+        return $this->hasMany(CreditNote::class);
+    }
 }

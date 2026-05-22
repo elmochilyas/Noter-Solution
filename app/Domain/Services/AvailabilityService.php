@@ -3,6 +3,7 @@
 namespace App\Domain\Services;
 
 use App\Enums\BookingFormat;
+use App\Exceptions\Domain\SlotNotAvailable;
 use App\Models\AvailabilityException;
 use App\Models\AvailabilityRule;
 use App\Models\Booking;
@@ -19,52 +20,102 @@ final class AvailabilityService
         CarbonImmutable $to,
         ConsultationPlan $plan,
         BookingFormat $format,
-    ): iterable {
-        $slots = [];
+    ): array {
+        $cacheKey = "slots:{$plan->id}:{$format->value}:{$from->format('Ymd')}:{$to->format('Ymd')}";
 
-        $current = $from->copy()->startOfDay();
-        while ($current->lessThanOrEqualTo($to)) {
-            $dayOfWeek = (int) $current->dayOfWeekIso;
+        return \Cache::remember($cacheKey, 60, function () use ($from, $to, $plan, $format) {
+            $slots = [];
+            $durationMinutes = $plan->duration_minutes;
+            $now = CarbonImmutable::now();
 
-            $rules = AvailabilityRule::where('day_of_week', $dayOfWeek)
-                ->where('is_active', true)
-                ->where(function ($q) use ($format) {
-                    $q->where('format', $format->value)->orWhere('format', 'both');
-                })
+            $current = $from->startOfDay();
+            while ($current->lessThanOrEqualTo($to)) {
+                $dayOfWeek = (int) $current->dayOfWeekIso;
+
+                $rules = AvailabilityRule::where('day_of_week', $dayOfWeek)
+                    ->where('is_active', true)
+                    ->where(function ($q) use ($format) {
+                        $q->where('format', $format->value)->orWhere('format', 'both');
+                    })
+                    ->get();
+
+                foreach ($rules as $rule) {
+                    $ruleStartDay = $current->format('Y-m-d');
+                    $ruleStart = CarbonImmutable::parse($ruleStartDay.' '.$rule->starts_at);
+                    $ruleEnd = CarbonImmutable::parse($ruleStartDay.' '.$rule->ends_at);
+
+                    $cursor = $ruleStart;
+                    $maxIterations = 100;
+                    $iterations = 0;
+
+                    while ($cursor->lessThan($ruleEnd) && $iterations < $maxIterations) {
+                        $slotEnd = $cursor->addMinutes($durationMinutes);
+
+                        if ($slotEnd->greaterThan($ruleEnd)) {
+                            break;
+                        }
+
+                        if ($cursor->hour < 9 || $slotEnd->hour > 18 || ($slotEnd->hour === 18 && $slotEnd->minute > 0)) {
+                            $cursor = $slotEnd;
+                            $iterations++;
+
+                            continue;
+                        }
+
+                        if ($slotEnd->lessThanOrEqualTo($now->addHours(2))) {
+                            $cursor = $slotEnd;
+                            $iterations++;
+
+                            continue;
+                        }
+
+                        $slots[] = new TimeSlot($cursor, $slotEnd);
+
+                        $cursor = $slotEnd;
+                        $iterations++;
+                    }
+                }
+
+                $current = $current->addDay();
+            }
+
+            $exceptions = AvailabilityException::where('starts_at', '<', $to)
+                ->where('ends_at', '>', $from)
                 ->get();
 
-            foreach ($rules as $rule) {
-                $slotStart = $current->setTimeFromTimeString($rule->starts_at);
-                $slotEnd = $current->setTimeFromTimeString($rule->ends_at);
-                $slots[] = new TimeSlot($slotStart, $slotEnd);
-            }
+            $bookedSlots = Booking::whereIn('status', ['pending_payment', 'confirmed'])
+                ->where('starts_at', '<', $to)
+                ->where('ends_at', '>', $from)
+                ->get();
 
-            $current = $current->addDay();
-        }
+            $holds = BookingHold::where('expires_at', '>', $now)
+                ->where('slot_starts_at', '<', $to)
+                ->where('slot_ends_at', '>', $from)
+                ->get();
 
-        $exceptions = AvailabilityException::whereBetween('starts_at', [$from, $to])
-            ->orWhereBetween('ends_at', [$from, $to])
-            ->get();
+            $slots = collect($slots)->filter(function (TimeSlot $slot) use ($exceptions, $bookedSlots, $holds) {
+                $isExcluded = $exceptions->contains(fn (AvailabilityException $e) => $slot->overlaps(
+                    new TimeSlot($e->starts_at->toImmutable(), $e->ends_at->toImmutable()),
+                ));
 
-        $bookedSlots = Booking::whereIn('status', ['pending_payment', 'confirmed'])
-            ->whereBetween('starts_at', [$from, $to])
-            ->get();
+                $isBooked = $bookedSlots->contains(fn (Booking $b) => $slot->overlaps(
+                    new TimeSlot($b->starts_at->toImmutable(), $b->ends_at->toImmutable()),
+                ));
 
-        foreach ($slots as $i => $slot) {
-            $isExcluded = $exceptions->contains(fn (AvailabilityException $e) => $slot->overlaps(
-                new TimeSlot($e->starts_at->toImmutable(), $e->ends_at->toImmutable()),
-            ));
+                $isHeld = $holds->contains(fn (BookingHold $h) => $slot->overlaps(
+                    new TimeSlot($h->slot_starts_at->toImmutable(), $h->slot_ends_at->toImmutable()),
+                ));
 
-            $isBooked = $bookedSlots->contains(fn (Booking $b) => $slot->overlaps(
-                new TimeSlot($b->starts_at->toImmutable(), $b->ends_at->toImmutable()),
-            ));
+                return ! $isExcluded && ! $isBooked && ! $isHeld;
+            })->values()->toArray();
 
-            if ($isExcluded || $isBooked) {
-                unset($slots[$i]);
-            }
-        }
+            return $slots;
+        });
+    }
 
-        return array_values($slots);
+    public function clearSlotsCache(ConsultationPlan $plan, BookingFormat $format): void
+    {
+        \Cache::forget("slots:{$plan->id}:{$format->value}:*");
     }
 
     public function assertSlotIsFree(TimeSlot $slot, BookingFormat $format): void
@@ -74,8 +125,13 @@ final class AvailabilityService
             ->where('ends_at', '>', $slot->startsAt)
             ->exists();
 
-        if ($overlapping) {
-            throw new \RuntimeException('Time slot overlaps with an existing booking');
+        $held = BookingHold::where('expires_at', '>', now())
+            ->where('slot_starts_at', '<', $slot->endsAt)
+            ->where('slot_ends_at', '>', $slot->startsAt)
+            ->exists();
+
+        if ($overlapping || $held) {
+            throw new SlotNotAvailable;
         }
     }
 

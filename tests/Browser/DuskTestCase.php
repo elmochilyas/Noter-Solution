@@ -1,0 +1,8 @@
+<?php
+
+use Laravel\Dusk\TestCase as BaseTestCase;
+
+abstract class DuskTestCase extends BaseTestCase
+{
+    use CreatesApplication;
+}

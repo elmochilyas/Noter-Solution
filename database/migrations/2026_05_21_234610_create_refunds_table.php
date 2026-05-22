@@ -14,7 +14,7 @@ return new class extends Migration
             $table->integer('amount_centimes');
             $table->string('reason', 255);
             $table->string('gateway_refund_id', 255);
-            $table->foreignId('requested_by')->constrained('users')->restrictOnDelete();
+            $table->foreignId('requested_by')->nullable()->constrained('users')->restrictOnDelete();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('status', 20);
             $table->timestamp('processed_at')->nullable();
