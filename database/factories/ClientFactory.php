@@ -18,6 +18,7 @@ class ClientFactory extends Factory
             'phone' => '+2126'.fake()->numerify('########'),
             'full_name' => fake()->name(),
             'preferred_locale' => fake()->randomElement(['fr', 'ar']),
+            'preferred_channel' => fake()->randomElement(['email', 'sms', 'whatsapp']),
             'national_id' => 'BE'.fake()->numerify('#######'),
             'national_id_last4' => fake()->numerify('####'),
         ];

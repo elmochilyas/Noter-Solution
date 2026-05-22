@@ -39,4 +39,5 @@ return [
     'form_validation_message_max' => 'Le message ne doit pas dépasser 2000 caractères.',
     'form_validation_preferred_contact_required' => 'Veuillez choisir un moyen de contact préféré.',
     'form_validation_rate_limit' => 'Trop de tentatives. Veuillez réessayer plus tard.',
+    'form_validation_captcha' => 'Veuillez confirmer que vous n\'êtes pas un robot.',
 ];

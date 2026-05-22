@@ -6,6 +6,7 @@ use App\Events\BookingCancelled;
 use App\Events\BookingConfirmed;
 use App\Events\BookingRescheduled;
 use App\Events\ContactMessageReceived;
+use App\Events\MagicLinkRequested;
 use App\Events\PaymentFailed;
 use App\Events\PaymentSucceeded;
 use App\Events\RefundIssued;
@@ -21,6 +22,7 @@ use App\Listeners\SendBookingCancelledNotifications;
 use App\Listeners\SendBookingConfirmationNotifications;
 use App\Listeners\SendBookingRescheduledNotifications;
 use App\Listeners\SendContactMessageNotification;
+use App\Listeners\SendMagicLinkNotification;
 use App\Listeners\SendRefundIssuedNotification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -61,6 +63,10 @@ class EventServiceProvider extends ServiceProvider
 
         PaymentFailed::class => [
             NotifyPaymentFailed::class,
+        ],
+
+        MagicLinkRequested::class => [
+            SendMagicLinkNotification::class,
         ],
 
         RefundIssued::class => [

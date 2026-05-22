@@ -39,4 +39,5 @@ return [
     'form_validation_message_max' => 'يجب ألا تتجاوز الرسالة 2000 حرف.',
     'form_validation_preferred_contact_required' => 'يرجى اختيار وسيلة الاتصال المفضلة.',
     'form_validation_rate_limit' => 'محاولات كثيرة. يرجى المحاولة لاحقًا.',
+    'form_validation_captcha' => 'يرجى تأكيد أنك لست برنامجًا آليًا.',
 ];

@@ -1,9 +1,8 @@
 <?php
 
 use App\Models\ConsultationPlan;
-use Laravel\Dusk\Browser;
 
-uses(Browser::class)->group('dusk', 'booking');
+uses()->group('dusk', 'booking');
 
 beforeEach(function () {
     $this->plan = ConsultationPlan::factory()->create(['price_centimes' => 50000]);

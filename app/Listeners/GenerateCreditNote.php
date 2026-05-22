@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\RefundIssued;
+use App\Jobs\GenerateCreditNotePdf;
 use App\Models\CreditNote;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,7 @@ final class GenerateCreditNote implements ShouldQueue
         $storagePath = sprintf('credit-notes/%s/%s/%s.pdf', now()->format('Y'), now()->format('m'), $number);
 
         try {
-            CreditNote::create([
+            $creditNote = CreditNote::create([
                 'number' => $number,
                 'refund_id' => $refund->id,
                 'payment_id' => $payment->id,
@@ -37,6 +38,8 @@ final class GenerateCreditNote implements ShouldQueue
                 'storage_path' => $storagePath,
                 'issued_at' => now(),
             ]);
+
+            GenerateCreditNotePdf::dispatch($creditNote);
 
             Log::info('Credit note generated', [
                 'number' => $number,

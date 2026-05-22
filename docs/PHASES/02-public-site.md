@@ -60,9 +60,9 @@ Acceptance:
 - [x] "À propos" teaser linking to About page
 - [x] FAQ teaser: 3 expandable items + link to FAQ
 - [x] Final CTA strip
-- [ ] LCP element identified and preloaded (likely the portrait)
-- [ ] Hero portrait: WebP, multiple `srcset` sizes
-- [ ] All copy editable via Filament `Service` or settings-style table (no hardcoded marketing text)
+- [ ] LCP element identified and preloaded (likely the portrait) *— blocked: needs real Sana portrait asset (currently placeholder)*
+- [ ] Hero portrait: WebP, multiple `srcset` sizes *— blocked: needs real Sana portrait asset*
+- [x] All copy editable via Filament `Service` or settings-style table (no hardcoded marketing text) — `ServiceResource` provides full CMS editing with tabs per locale
 
 ### Task 3: About page
 
@@ -101,7 +101,7 @@ Acceptance:
 - [x] `/{locale}/faq` lists all published FAQs grouped by category
 - [x] Each item is a Livewire collapsible card; expand increments `view_count`
 - [x] Search bar with debounced live filtering (SQL LIKE fallback — Meilisearch/Scout deferred)
-- [ ] Meilisearch installed on Hetzner box, indexed via Laravel Scout
+- [ ] ~~Meilisearch installed on Hetzner box, indexed via Laravel Scout~~ *— deferred: SQL LIKE + Livewire filtering handles 30 FAQs; Meilisearch adds value at 200+ entries*
 - [x] Filament `FaqResource` allows CRUD + publish toggle + bulk publish/unpublish (re-embed action is for phase 6)
 - [x] ~30 seed FAQs across 5 categories (Sana refines copy)
 
@@ -123,13 +123,13 @@ Acceptance:
 - [x] Livewire component with fields per `FEATURES/public-site.md`
 - [x] Server-side validation via Livewire rules
 - [x] Honeypot field
-- [ ] Cloudflare Turnstile widget (key in `.env`)
+- [x] Cloudflare Turnstile widget integrated (uses `TURNSTILE_SITE_KEY`/`TURNSTILE_SECRET_KEY` env vars, validated server-side via Cloudflare API)
 - [x] Rate limit: 5/hr per IP
 - [x] On submit: `ContactMessage` created, `ContactMessageReceived` event fired
 - [x] Event listener emails Sana + assistant
 - [x] Success message displayed inline
 - [x] Form resets on success
-- [ ] Email delivered via Resend (verified end-to-end)
+- [ ] Email delivered via Resend (verified end-to-end) *— needs `RESEND_KEY` in `.env` and `MAIL_MAILER=resend`*
 
 ### Task 9: Legal pages
 

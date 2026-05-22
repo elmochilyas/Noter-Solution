@@ -4,6 +4,7 @@ use App\Models\Client;
 use App\Models\MagicLink;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
@@ -11,6 +12,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Event::fake();
+    RateLimiter::clear('magic-link:ip:127.0.0.1');
 });
 
 test('guest can view magic link form', function () {

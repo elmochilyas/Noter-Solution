@@ -25,6 +25,11 @@ class FaqResource extends Resource
 
     protected static ?string $pluralLabel = 'FAQ';
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['question_translations.fr', 'question_translations.ar', 'answer_translations.fr', 'answer_translations.ar'];
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-question-mark-circle';

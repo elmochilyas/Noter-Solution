@@ -8,8 +8,8 @@
 @section('structured_data')
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": ["LegalService", "LocalBusiness"],
+  "@@context": "https://schema.org",
+  "@@type": ["LegalService", "LocalBusiness"],
   "@id": "{{ url('/') }}",
   "name": "Sana Bouhamidi — Notaire Adoul",
   "description": "{{ __('common.tagline') }}",
@@ -18,14 +18,14 @@
   "email": "{{ $practiceInfo['email'] ?: 'sana.bouhamidi@gmail.com' }}",
   "image": "{{ url('/images/sana-portrait.jpg') }}",
   "address": {
-    "@type": "PostalAddress",
+    "@@type": "PostalAddress",
     "streetAddress": "{{ $practiceInfo['address'] ?: 'Bensergao, près du Tribunal de Première Instance' }}",
     "addressLocality": "Agadir",
     "addressCountry": "MA"
   },
   "openingHoursSpecification": [
     {
-      "@type": "OpeningHoursSpecification",
+      "@@type": "OpeningHoursSpecification",
       "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
       "opens": "09:00",
       "closes": "17:00"

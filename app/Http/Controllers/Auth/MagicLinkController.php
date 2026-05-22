@@ -8,6 +8,8 @@ use App\Services\Auth\MagicLinkService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class MagicLinkController extends Controller
@@ -27,17 +29,41 @@ class MagicLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        $client = Client::where('email', $data['email'])->first();
-
         $locale = $request->route('locale');
+        $email = $data['email'];
+        $ip = $request->ip();
 
-        if ($client) {
-            $this->magicLink->send(
-                $client,
-                $locale,
-                $request->input('intended', route('portal.dashboard', ['locale' => $locale])),
-            );
+        $emailKey = 'magic-link:email:'.sha1($email);
+        $ipKey = 'magic-link:ip:'.str_replace(':', '.', $ip ?? '0.0.0.0');
+
+        if (RateLimiter::tooManyAttempts($emailKey, 3)) {
+            return back()->withErrors(['email' => __('auth.throttle')]);
         }
+
+        if (RateLimiter::tooManyAttempts($ipKey, 10)) {
+            return back()->withErrors(['email' => __('auth.throttle')]);
+        }
+
+        RateLimiter::hit($emailKey, 3600);
+        RateLimiter::hit($ipKey, 3600);
+
+        $client = Client::where('email', $email)->first();
+
+        if (! $client) {
+            $client = Client::create([
+                'uuid' => (string) Str::uuid(),
+                'email' => $email,
+                'phone' => '0000000000',
+                'full_name' => $email,
+                'preferred_locale' => $locale,
+            ]);
+        }
+
+        $this->magicLink->send(
+            $client,
+            $locale,
+            $request->input('intended', route('portal.dashboard', ['locale' => $locale])),
+        );
 
         return to_route('portal.login.sent', ['locale' => $locale]);
     }

@@ -114,7 +114,7 @@ Acceptance:
 - [x] Stripe.js + Elements loaded on payment step (publishable key from `.env`)
 - [x] `POST /book/intent/create` (Livewire action) creates a `PaymentIntent` with idempotency key `booking-{id}`
 - [x] Client confirms with `stripe.confirmCardPayment` using returned `client_secret`
-- [ ] 3DS challenge handled (tested with `4000 0027 6000 3184` test card) — needs staging test
+- [ ] 3DS challenge handled (tested with `4000 0027 6000 3184` test card) — needs staging test + `STRIPE_WEBHOOK_SECRET` in `.env`
 - [x] Failure shows translated error
 - [x] Successful payment redirects to `/book/success?reference=…`
 - [x] CSP allows Stripe iframe domains — `ContentSecurityPolicy` middleware adds `frame-src https://js.stripe.com https://hooks.stripe.com`
@@ -165,8 +165,12 @@ Acceptance:
 - [x] Receipt row inserted
 - [x] `payment.receipt` email sent with PDF attached — `PaymentReceipt::toMail()` attaches PDF from `receipts` disk via `Storage::attach()`
 - [x] Credit-note generation — `GenerateCreditNote` listener wired on `RefundIssued`, creates `CreditNote` row in `credit_notes` table with sequential `AV-{year}-{seq}` number
+- [x] PDF library installed (`barryvdh/laravel-dompdf` v3.1) — renders receipts and credit notes into actual PDFs via Dompdf
+- [x] `GenerateReceiptPdf` updated to render PDF binary (not raw HTML) via dompdf
+- [x] `GenerateCreditNotePdf` job created — renders credit-note PDF via `pdf/credit-note.blade.php` template and dispatches from `GenerateCreditNote` listener
+- [x] Credit-note PDF view template created (`resources/views/pdf/credit-note.blade.php`) with bilingual RTL support
+- [x] Notification translation files (`lang/{fr,ar}/notifications.php`) now include all `.sms` and `.whatsapp` keys with `:url` support
 - [ ] Sana's accountant reviewed a sample receipt
-- [ ] Credit-note PDF rendered via Browsershot (same approach as receipt; storage path created but PDF not yet generated without Puppeteer)
 
 ### Task 11: Notifications — email
 
@@ -177,7 +181,9 @@ Acceptance:
 - [x] SMS/WhatsApp translation keys added to both `lang/{fr,ar}/notifications.php` — `.sms` and `.whatsapp` sub-keys for all 7 notification types
 - [x] Reply-To headers set on all 7 client-facing notifications via `$msg->replyTo(config('mail.reply_to.address'), config('mail.reply_to.name'))`
 - [x] `.env.example` has `MAIL_REPLY_TO_ADDRESS`, `MAIL_REPLY_TO_NAME`, `MAIL_ADMIN_ADDRESS` entries
-- [ ] Resend driver configured, sending verified — requires `RESEND_KEY` in `.env`
+- [x] Reply-To headers set on all 7 client-facing notifications via `$msg->replyTo(...)`
+- [x] `.env.example` has `MAIL_REPLY_TO_ADDRESS`, `MAIL_REPLY_TO_NAME`, `MAIL_ADMIN_ADDRESS` entries
+- [ ] Resend driver configured, sending verified — requires `RESEND_KEY` in `.env` and `MAIL_MAILER=resend` in production
 
 ### Task 12: Notifications — SMS
 
@@ -187,7 +193,9 @@ Acceptance:
 - [x] `NotificationService::send()` dispatches SMS via `Notification::route(TwilioSmsChannel::class, $phone)->notify(new TwilioSmsNotification($text))`
 - [x] SMS text generated per template via `getChannelText()` using `__('notifications.{key}.sms', [], $locale)` — all 7 notification types have bilingual SMS keys (≤ 160 chars)
 - [x] URL shortener implemented — `ShortLink` model + `short_links` migration + `ShortLinkController` at `GET /s/{hash}` (301 redirect) + `ShortLink::generate()` factory
-- [ ] URL shortener integrated into SMS templates — currently sends raw booking reference; needs `ShortLink::generate()` call to wrap URLs
+- [x] URL shortener integrated into `NotificationService::getChannelText()` — `ShortLink::generate()` creates short URLs for booking portal links, passed as `:url` to translation templates
+- [x] SMS/WhatsApp text for all 7 notification types updated to include `:url` parameter
+- [x] `lang/{fr,ar}/notifications.php` updated with `.sms` and `.whatsapp` keys including `:url`
 - [ ] Twilio driver configured — requires Twilio account + `.env` (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_SMS`)
 - [ ] Test send to a real Moroccan phone succeeds in staging
 - [ ] Failure handling with retry policy — `TwilioSmsChannel` logs errors and updates `notifications_log` to `failed`

@@ -1,15 +1,20 @@
 <?php
 
 use App\Http\Middleware\AddRequestId;
+use App\Http\Middleware\ClientSessionLifetime;
 use App\Http\Middleware\ContentSecurityPolicy;
 use App\Http\Middleware\SetLocaleMiddleware;
 use App\Http\Middleware\SetSessionLifetime;
 use App\Http\Middleware\ThrottleWebhooks;
+use App\Providers\PulseServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
+    ->withProviders([
+        PulseServiceProvider::class,
+    ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
@@ -17,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
+            'client.session' => ClientSessionLifetime::class,
             'locale' => SetLocaleMiddleware::class,
             'request.id' => AddRequestId::class,
             'session.lifetime' => SetSessionLifetime::class,

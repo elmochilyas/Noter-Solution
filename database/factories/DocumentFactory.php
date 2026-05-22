@@ -23,6 +23,7 @@ class DocumentFactory extends Factory
             'size_bytes' => fake()->numberBetween(10000, 5000000),
             'storage_path' => 'documents/'.fake()->uuid().'.pdf',
             'scan_status' => 'pending',
+            'purge_after' => now()->addYear(),
         ];
     }
 

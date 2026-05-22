@@ -27,6 +27,11 @@ class ServiceResource extends Resource
 
     protected static ?string $pluralLabel = 'Services';
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['title_translations.fr', 'title_translations.ar', 'intro_translations.fr', 'intro_translations.ar'];
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-briefcase';

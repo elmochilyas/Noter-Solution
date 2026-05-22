@@ -20,6 +20,8 @@ return [
     'magic_link_expired' => 'Ce lien de connexion a expiré. Veuillez en demander un nouveau.',
     'magic_link_invalid' => 'Ce lien de connexion est invalide ou a déjà été utilisé.',
 
+    'throttle' => 'Trop de tentatives. Veuillez réessayer dans une heure.',
+
     '2fa_title' => 'Authentification à deux facteurs',
     '2fa_code' => 'Code d\'authentification',
     '2fa_verify' => 'Vérifier',

@@ -5,7 +5,7 @@
             <p class="text-green-800 font-medium">{{ __('contact.form_success') }}</p>
         </div>
     @else
-        <form wire:submit.prevent="submit" class="bg-white border border-stone-200 rounded-lg p-8 md:p-12 space-y-6">
+        <form wire:submit.prevent="submit" class="bg-white border border-stone-200 rounded-lg p-8 md:p-12 space-y-6" x-data x-init="window.turnstileCallback = (token) => $wire.set('turnstileToken', token)">
             <h2 class="text-2xl font-semibold text-ink mb-2">{{ __('contact.form_title') }}</h2>
 
             {{-- Honeypot — invisible to users --}}
@@ -44,6 +44,21 @@
                 <label for="message" class="block text-sm font-medium text-ink mb-1.5">{{ __('contact.form_message') }}</label>
                 <textarea id="message" wire:model="message" rows="5" class="w-full rounded-md border border-stone-200 bg-parchment px-4 py-2.5 text-sm text-ink placeholder:text-stone-400 focus:border-brass-500 focus:outline-none focus:ring-2 focus:ring-brass-500/20 transition-fast resize-y @error('message') border-red-400 @enderror"></textarea>
                 @error('message') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+            </div>
+
+            @error('turnstile') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+
+            <div class="flex justify-center" wire:ignore>
+                <div x-init="$nextTick(() => {
+                    if (typeof turnstile !== 'undefined' && document.getElementById('cf-turnstile')) {
+                        turnstile.render('#cf-turnstile', {
+                            sitekey: '{{ config('services.turnstile.site_key') }}',
+                            callback: function(token) { $wire.set('turnstileToken', token); },
+                        });
+                    }
+                })">
+                    <div id="cf-turnstile"></div>
+                </div>
             </div>
 
             <button type="submit" class="w-full h-12 rounded-md bg-brass-500 text-sm font-semibold text-parchment hover:bg-brass-600 transition-fast inline-flex items-center justify-center disabled:opacity-50" wire:loading.attr="disabled">

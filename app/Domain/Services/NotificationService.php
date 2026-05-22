@@ -11,6 +11,7 @@ use App\Models\NotificationsLog;
 use App\Models\Payment;
 use App\Models\Receipt;
 use App\Models\Refund;
+use App\Models\ShortLink;
 use App\Notifications\AdminContactMessage;
 use App\Notifications\AdminDispute;
 use App\Notifications\AdminNewBooking;
@@ -296,38 +297,70 @@ final class NotificationService
         });
     }
 
+    private function shortBookingUrl(Booking $booking): string
+    {
+        $locale = $booking->client?->preferred_locale ?? 'fr';
+        $target = url("/{$locale}/portal/bookings/{$booking->reference}");
+
+        $link = ShortLink::generate($target);
+
+        return url("/s/{$link->hash}");
+    }
+
     private function getChannelText(string $templateKey, string $channel, Client $recipient, array $data): string
     {
         $locale = $recipient->preferred_locale ?? 'fr';
         $booking = $data['booking'] ?? null;
+        $url = $booking instanceof Booking ? $this->shortBookingUrl($booking) : '';
 
         return match ($templateKey) {
             'booking.confirmation' => $booking
-                ? __('notifications.booking_confirmed.sms', ['reference' => $booking->reference, 'date' => $booking->starts_at->format('d/m/Y H:i')], $locale)
+                ? __("notifications.booking_confirmed.{$channel}", [
+                    'reference' => $booking->reference,
+                    'date' => $booking->starts_at->format('d/m/Y H:i'),
+                    'url' => $url,
+                ], $locale)
                 : '',
             'booking.reminder.24h' => $booking
-                ? __('notifications.booking_reminder_24h.sms', ['reference' => $booking->reference, 'date' => $booking->starts_at->format('d/m/Y H:i')], $locale)
+                ? __("notifications.booking_reminder_24h.{$channel}", [
+                    'reference' => $booking->reference,
+                    'date' => $booking->starts_at->format('d/m/Y H:i'),
+                    'url' => $url,
+                ], $locale)
                 : '',
             'booking.reminder.1h' => $booking
-                ? __('notifications.booking_reminder_1h.sms', ['reference' => $booking->reference, 'date' => $booking->starts_at->format('d/m/Y H:i')], $locale)
+                ? __("notifications.booking_reminder_1h.{$channel}", [
+                    'reference' => $booking->reference,
+                    'date' => $booking->starts_at->format('d/m/Y H:i'),
+                    'url' => $url,
+                ], $locale)
                 : '',
             'booking.cancelled' => $booking
-                ? __('notifications.booking_cancelled.sms', ['reference' => $booking->reference], $locale)
+                ? __("notifications.booking_cancelled.{$channel}", [
+                    'reference' => $booking->reference,
+                    'url' => $url,
+                ], $locale)
                 : '',
-            'booking.rescheduled' => __('notifications.booking_rescheduled.sms', [
+            'booking.rescheduled' => __("notifications.booking_rescheduled.{$channel}", [
                 'old_ref' => $data['old_booking']?->reference ?? '',
                 'new_ref' => $data['new_booking']?->reference ?? '',
                 'date' => $data['new_booking']?->starts_at?->format('d/m/Y H:i') ?? '',
+                'url' => $data['new_booking'] instanceof Booking ? $this->shortBookingUrl($data['new_booking']) : '',
             ], $locale),
-            'payment.receipt' => __('notifications.payment_receipt.sms', [
+            'payment.receipt' => __("notifications.payment_receipt.{$channel}", [
                 'number' => $data['receipt']?->number ?? '',
                 'amount' => isset($data['receipt']) ? number_format($data['receipt']->amount_centimes / 100, 2, ',', ' ') : '',
+                'url' => '',
             ], $locale),
             'payment.failed' => $booking
-                ? __('notifications.payment_failed.sms', ['reference' => $booking->reference], $locale)
+                ? __("notifications.payment_failed.{$channel}", [
+                    'reference' => $booking->reference,
+                    'url' => $url,
+                ], $locale)
                 : '',
-            'refund.issued' => __('notifications.refund_issued.sms', [
+            'refund.issued' => __("notifications.refund_issued.{$channel}", [
                 'amount' => isset($data['refund']) ? number_format($data['refund']->amount_centimes / 100, 2, ',', ' ') : '',
+                'url' => '',
             ], $locale),
             default => '',
         };

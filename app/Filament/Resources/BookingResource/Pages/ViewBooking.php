@@ -5,16 +5,20 @@ namespace App\Filament\Resources\BookingResource\Pages;
 use App\Domain\Services\BookingService;
 use App\Domain\Services\PaymentService;
 use App\Filament\Resources\BookingResource;
+use App\Filament\Resources\ClientResource;
 use App\Models\Booking;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\Textarea;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
+use Illuminate\Support\Facades\Cache;
+use Spatie\Activitylog\Models\Activity;
 
 class ViewBooking extends ViewRecord
 {
@@ -23,6 +27,23 @@ class ViewBooking extends ViewRecord
     public function getTitle(): string
     {
         return "Réservation {$this->record->reference}";
+    }
+
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+
+        $user = auth()->user();
+        $cacheKey = "viewed_notes:booking:{$this->record->id}:user:{$user->id}";
+
+        if (! Cache::has($cacheKey)) {
+            activity()
+                ->performedOn($this->record)
+                ->causedBy($user)
+                ->log('Notes internes consultées par '.$user->name);
+
+            Cache::put($cacheKey, true, now()->addHour());
+        }
     }
 
     protected function getHeaderActions(): array
@@ -111,13 +132,15 @@ class ViewBooking extends ViewRecord
                                 TextEntry::make('format')->label('Format'),
                                 TextEntry::make('starts_at')->label('Début')->dateTime('d/m/Y H:i'),
                                 TextEntry::make('ends_at')->label('Fin')->dateTime('d/m/Y H:i'),
+                                TextEntry::make('service_category')->label('Catégorie'),
                                 TextEntry::make('description')->label('Description')->columnSpanFull(),
                             ]),
 
                         Section::make('Client')
                             ->columns(2)
                             ->schema([
-                                TextEntry::make('client.full_name')->label('Nom'),
+                                TextEntry::make('client.full_name')->label('Nom')
+                                    ->url(fn ($record) => $record->client ? Page::getResourceUrl(ClientResource::class, 'view', [$record->client]) : null),
                                 TextEntry::make('client.email')->label('Email'),
                                 TextEntry::make('client.phone')->label('Téléphone'),
                                 TextEntry::make('client.preferred_locale')->label('Langue'),
@@ -148,6 +171,11 @@ class ViewBooking extends ViewRecord
                             ->schema([
                                 TextEntry::make('receipt.number')->label('Numéro'),
                                 TextEntry::make('receipt.issued_at')->label('Émis le')->dateTime('d/m/Y H:i'),
+                                TextEntry::make('receipt')
+                                    ->label('')
+                                    ->visible(fn ($record) => $record->receipt !== null)
+                                    ->formatStateUsing(fn ($state, $record) => '<a href="'.route('admin.downloads.receipt', $record->receipt).'" class="text-primary-600 underline">Télécharger le PDF</a>')
+                                    ->html(),
                             ])
                             ->visible(fn ($record) => $record->receipt !== null),
                     ]),
@@ -170,20 +198,40 @@ class ViewBooking extends ViewRecord
                     ->visible(fn ($record) => $record->payment !== null),
 
                 Section::make('Documents')
-                    ->schema([
-                        TextEntry::make('documents')
-                            ->label('')
-                            ->formatStateUsing(fn ($state, $record) => $record->documents->isEmpty()
-                                ? 'Aucun document'
-                                : $record->documents->pluck('original_name')->implode("\n"))
-                            ->html(),
-                    ]),
+                    ->schema(function ($record) {
+                        if ($record->documents->isEmpty()) {
+                            return [TextEntry::make('no_docs')->label('')->default('Aucun document')];
+                        }
+
+                        return $record->documents->map(fn ($doc) => TextEntry::make("doc_{$doc->id}")
+                            ->label($doc->original_filename)
+                            ->formatStateUsing(fn () => '<a href="'.route('admin.downloads.document', $doc).'" class="text-primary-600 underline">Télécharger</a>')
+                            ->html())->toArray();
+                    }),
 
                 Section::make('Notes internes')
                     ->schema([
                         TextEntry::make('internal_notes')
                             ->label(''),
                     ]),
+
+                Section::make('Journal d\'activité')
+                    ->schema(function ($record) {
+                        $activities = Activity::where('subject_type', Booking::class)
+                            ->where('subject_id', $record->id)
+                            ->latest()
+                            ->take(20)
+                            ->get();
+
+                        if ($activities->isEmpty()) {
+                            return [TextEntry::make('no_activity')->label('')->default('Aucune activité')];
+                        }
+
+                        return $activities->map(fn ($activity) => TextEntry::make("activity_{$activity->id}")
+                            ->label($activity->created_at->format('d/m/Y H:i'))
+                            ->formatStateUsing(fn () => ($activity->causer?->name ?? 'Système').' — '.$activity->description)
+                            ->html())->toArray();
+                    }),
             ]);
     }
 }

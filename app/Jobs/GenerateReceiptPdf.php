@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Domain\Services\NotificationService;
 use App\Models\Receipt;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,18 +24,20 @@ class GenerateReceiptPdf implements ShouldQueue
     public function handle(): void
     {
         try {
-            $html = view('pdf.receipt', [
+            $locale = $this->receipt->booking?->client?->preferred_locale ?? 'fr';
+
+            $pdf = Pdf::loadView('pdf.receipt', [
                 'receipt' => $this->receipt,
-                'locale' => $this->receipt->booking?->client?->preferred_locale ?? 'fr',
+                'locale' => $locale,
                 'booking' => $this->receipt->booking,
                 'client' => $this->receipt->booking?->client,
-            ])->render();
+            ]);
 
             $storagePath = $this->receipt->storage_path;
 
             if ($storagePath) {
                 $disk = Storage::disk('receipts');
-                $disk->put($storagePath, $html);
+                $disk->put($storagePath, $pdf->output());
             }
 
             app(NotificationService::class)->sendPaymentReceipt($this->receipt);

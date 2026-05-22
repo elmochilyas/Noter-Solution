@@ -1,6 +1,14 @@
 <?php
 
+use App\Http\Controllers\Admin\DownloadController as AdminDownloadController;
 use App\Http\Controllers\Auth\MagicLinkController;
+use App\Http\Controllers\Portal\AccountDeletionController;
+use App\Http\Controllers\Portal\BookingController as PortalBookingController;
+use App\Http\Controllers\Portal\CancelController as PortalCancelController;
+use App\Http\Controllers\Portal\DownloadController;
+use App\Http\Controllers\Portal\PreferenceController;
+use App\Http\Controllers\Portal\ReceiptController as PortalReceiptController;
+use App\Http\Controllers\Portal\RescheduleController as PortalRescheduleController;
 use App\Http\Controllers\Public\AboutController;
 use App\Http\Controllers\Public\ConsultationController;
 use App\Http\Controllers\Public\ContactController;
@@ -23,6 +31,11 @@ Route::post('/webhooks/resend', ResendWebhookController::class)->name('webhooks.
 Route::post('/webhooks/twilio', TwilioWebhookController::class)->name('webhooks.twilio');
 
 Route::get('/s/{hash}', ShortLinkController::class)->name('short-link');
+
+Route::middleware(['web', 'auth'])->prefix('admin/downloads')->name('admin.downloads.')->group(function () {
+    Route::get('receipts/{receipt}', [AdminDownloadController::class, 'receipt'])->name('receipt');
+    Route::get('documents/{document}', [AdminDownloadController::class, 'document'])->name('document');
+});
 
 Route::get('/', function () {
     $locale = 'ar';
@@ -93,8 +106,28 @@ Route::prefix('{locale}')->where(['locale' => 'ar|fr'])->middleware('locale')->g
         Route::get('login/verify', [MagicLinkController::class, 'verify'])->name('login.verify');
         Route::post('logout', [MagicLinkController::class, 'logout'])->name('logout');
 
-        Route::middleware('auth:client')->group(function () {
+        Route::middleware(['auth:client', 'client.session'])->group(function () {
             Route::get('dashboard', fn () => view('portal.dashboard'))->name('dashboard');
+
+            Route::get('bookings', [PortalBookingController::class, 'index'])->name('bookings.index');
+            Route::get('bookings/{reference}', [PortalBookingController::class, 'show'])->name('bookings.show');
+
+            Route::get('bookings/{reference}/cancel', [PortalCancelController::class, 'confirm'])->name('bookings.cancel.confirm');
+            Route::post('bookings/{reference}/cancel', [PortalCancelController::class, 'destroy'])->name('bookings.cancel.destroy');
+
+            Route::get('bookings/{reference}/reschedule', [PortalRescheduleController::class, 'edit'])->name('bookings.reschedule.edit');
+            Route::post('bookings/{reference}/reschedule', [PortalRescheduleController::class, 'update'])->name('bookings.reschedule.update');
+
+            Route::get('bookings/{reference}/documents/{document}', [DownloadController::class, 'document'])->name('bookings.documents.download');
+            Route::get('bookings/{reference}/receipt/{receipt}', [DownloadController::class, 'receipt'])->name('bookings.receipt.download');
+
+            Route::get('receipts', [PortalReceiptController::class, 'index'])->name('receipts.index');
+
+            Route::get('preferences', [PreferenceController::class, 'edit'])->name('preferences.edit');
+            Route::post('preferences', [PreferenceController::class, 'update'])->name('preferences.update');
+
+            Route::get('account/delete', [AccountDeletionController::class, 'confirm'])->name('account.delete.confirm');
+            Route::post('account/delete', [AccountDeletionController::class, 'destroy'])->name('account.delete.destroy');
         });
     });
 });

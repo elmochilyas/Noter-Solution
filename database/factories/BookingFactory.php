@@ -6,6 +6,7 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Client;
 use App\Models\ConsultationPlan;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BookingFactory extends Factory
@@ -14,7 +15,6 @@ class BookingFactory extends Factory
 
     public function definition(): array
     {
-        $startsAt = fake()->dateTimeBetween('+1 day', '+1 month');
         $plan = ConsultationPlan::factory();
 
         return [
@@ -24,8 +24,8 @@ class BookingFactory extends Factory
             'service_category' => fake()->randomElement(['family', 'real_estate', 'financial', 'contracts']),
             'description' => fake()->sentence(),
             'format' => fake()->randomElement(['online', 'in_office']),
-            'starts_at' => $startsAt,
-            'ends_at' => (clone $startsAt)->modify('+1 hour'),
+            'starts_at' => fake()->dateTimeBetween('+1 day', '+1 month'),
+            'ends_at' => fn (array $attrs) => Carbon::parse($attrs['starts_at'])->addHour(),
             'status' => BookingStatus::PENDING_PAYMENT->value,
             'total_centimes' => fake()->randomElement([0, 15000, 30000]),
             'currency' => 'MAD',

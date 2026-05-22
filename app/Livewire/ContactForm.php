@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Events\ContactMessageReceived;
 use App\Models\ContactMessage;
+use Illuminate\Support\Facades\Http;
 use Livewire\Component;
 
 class ContactForm extends Component
@@ -17,6 +18,8 @@ class ContactForm extends Component
     public string $message = '';
 
     public string $honeypot = '';
+
+    public string $turnstileToken = '';
 
     public bool $succeeded = false;
 
@@ -57,6 +60,23 @@ class ContactForm extends Component
 
         abort_if($recentCount >= 5, 429, __('contact.form_validation_rate_limit'));
 
+        $turnstileSecret = config('services.turnstile.secret_key');
+        if ($turnstileSecret) {
+            $response = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+                'secret' => $turnstileSecret,
+                'response' => $this->turnstileToken,
+                'remoteip' => $ip,
+            ]);
+
+            $outcome = $response->json();
+
+            if (! ($outcome['success'] ?? false)) {
+                $this->addError('turnstile', __('contact.form_validation_captcha'));
+
+                return;
+            }
+        }
+
         $contactMessage = ContactMessage::create([
             'name' => $this->name,
             'email' => $this->email,
@@ -68,7 +88,7 @@ class ContactForm extends Component
 
         event(new ContactMessageReceived($contactMessage));
 
-        $this->reset(['name', 'email', 'subject', 'message', 'honeypot']);
+        $this->reset(['name', 'email', 'subject', 'message', 'honeypot', 'turnstileToken']);
         $this->succeeded = true;
     }
 
