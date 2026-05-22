@@ -2,11 +2,13 @@
 
 return [
     'practice' => 'Cabinet',
-    'notaire' => 'Notaire de droit marocain',
+    'notaire' => 'Adoul authentifiée',
     'contact' => 'Contact',
-    'legal' => 'Informations légales',
-    'address' => 'Casablanca, Maroc',
+    'address' => 'Bensergao, près du Tribunal de Première Instance, Agadir',
+    'legal' => 'Légal',
     'legal_notices' => 'Mentions légales',
     'privacy' => 'Politique de confidentialité',
+    'terms' => 'Conditions d\'utilisation',
     'rights' => 'Tous droits réservés.',
+    'hours' => 'Lun–Ven 09h–17h',
 ];

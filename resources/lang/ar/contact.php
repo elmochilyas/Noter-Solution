@@ -1,0 +1,42 @@
+<?php
+
+return [
+    'page_title' => 'اتصل بنا — سناء بوحميدي',
+    'section_title' => 'المكتب',
+    'section_subtitle' => 'اتصل بنا لأي معلومات أو لحجز موعد.',
+
+    'address_title' => 'العنوان',
+    'hours_title' => 'ساعات العمل',
+    'phone_title' => 'الهاتف',
+    'email_title' => 'البريد الإلكتروني',
+    'whatsapp_title' => 'واتساب',
+    'directions_title' => 'كيفية الوصول',
+    'directions_text' => 'يقع مكتبنا في بنسرڭاو، بالقرب من المحكمة الابتدائية بأكادير.',
+
+    'form_title' => 'أرسل لنا رسالة',
+    'form_name' => 'الاسم الكامل',
+    'form_email' => 'البريد الإلكتروني',
+    'form_subject' => 'الموضوع',
+    'form_subject_family' => 'قانون الأسرة',
+    'form_subject_realestate' => 'القانون العقاري',
+    'form_subject_financial' => 'القانون المالي',
+    'form_subject_contracts' => 'العقود',
+    'form_subject_other' => 'أخرى',
+    'form_message' => 'الرسالة',
+    'form_preferred_contact' => 'أفضل أن يتم الاتصال بي عبر',
+    'form_preferred_phone' => 'الهاتف',
+    'form_preferred_email' => 'البريد الإلكتروني',
+    'form_preferred_whatsapp' => 'واتساب',
+    'form_submit' => 'إرسال',
+    'form_success' => 'تم إرسال رسالتك بنجاح. سنجيبك في أقرب وقت.',
+
+    'form_validation_name_required' => 'الاسم مطلوب.',
+    'form_validation_email_required' => 'البريد الإلكتروني مطلوب.',
+    'form_validation_email_valid' => 'يرجى إدخال بريد إلكتروني صحيح.',
+    'form_validation_subject_required' => 'يرجى اختيار موضوع.',
+    'form_validation_message_required' => 'الرسالة مطلوبة.',
+    'form_validation_message_min' => 'يجب أن تحتوي الرسالة على 20 حرفًا على الأقل.',
+    'form_validation_message_max' => 'يجب ألا تتجاوز الرسالة 2000 حرف.',
+    'form_validation_preferred_contact_required' => 'يرجى اختيار وسيلة الاتصال المفضلة.',
+    'form_validation_rate_limit' => 'محاولات كثيرة. يرجى المحاولة لاحقًا.',
+];

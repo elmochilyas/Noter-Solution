@@ -1,0 +1,42 @@
+<?php
+
+return [
+    'page_title' => 'Contact — Sana Bouhamidi',
+    'section_title' => 'Cabinet',
+    'section_subtitle' => 'Contactez-nous pour toute information ou pour prendre rendez-vous.',
+
+    'address_title' => 'Adresse',
+    'hours_title' => 'Horaires d\'ouverture',
+    'phone_title' => 'Téléphone',
+    'email_title' => 'Email',
+    'whatsapp_title' => 'WhatsApp',
+    'directions_title' => 'Comment venir',
+    'directions_text' => 'Notre cabinet est situé à Bensergao, à proximité du Tribunal de Première Instance d\'Agadir.',
+
+    'form_title' => 'Envoyez-nous un message',
+    'form_name' => 'Nom complet',
+    'form_email' => 'Email',
+    'form_subject' => 'Sujet',
+    'form_subject_family' => 'Droit de la famille',
+    'form_subject_realestate' => 'Droit immobilier',
+    'form_subject_financial' => 'Droit financier',
+    'form_subject_contracts' => 'Contrats',
+    'form_subject_other' => 'Autre',
+    'form_message' => 'Message',
+    'form_preferred_contact' => 'Je préfère être recontacté par',
+    'form_preferred_phone' => 'Téléphone',
+    'form_preferred_email' => 'Email',
+    'form_preferred_whatsapp' => 'WhatsApp',
+    'form_submit' => 'Envoyer',
+    'form_success' => 'Votre message a bien été envoyé. Nous vous répondrons dans les plus brefs délais.',
+
+    'form_validation_name_required' => 'Le nom est requis.',
+    'form_validation_email_required' => 'L\'email est requis.',
+    'form_validation_email_valid' => 'Veuillez entrer un email valide.',
+    'form_validation_subject_required' => 'Veuillez choisir un sujet.',
+    'form_validation_message_required' => 'Le message est requis.',
+    'form_validation_message_min' => 'Le message doit contenir au moins 20 caractères.',
+    'form_validation_message_max' => 'Le message ne doit pas dépasser 2000 caractères.',
+    'form_validation_preferred_contact_required' => 'Veuillez choisir un moyen de contact préféré.',
+    'form_validation_rate_limit' => 'Trop de tentatives. Veuillez réessayer plus tard.',
+];

@@ -1,0 +1,46 @@
+<?php
+
+return [
+    'mentions_title' => 'Mentions légales',
+    'mentions_intro' => 'Conformément aux dispositions de la loi 09-08 relative à la protection des données personnelles et aux obligations d\'information des professionnels.',
+    'privacy_title' => 'Politique de confidentialité',
+    'privacy_intro' => 'La protection de vos données personnelles est une priorité pour notre cabinet. Cette politique explique comment nous collectons, utilisons et protégeons vos informations.',
+    'terms_title' => 'Conditions d\'utilisation',
+    'terms_intro' => 'Les présentes conditions d\'utilisation régissent l\'accès et l\'utilisation du site internet de Maître Sana Bouhamidi.',
+
+    'last_updated' => 'Dernière mise à jour',
+    'content_heading' => 'Contenu',
+
+    'mentions_body_title' => 'Identité du cabinet',
+    'mentions_body_name' => 'Maître Sana Bouhamidi',
+    'mentions_body_title_profession' => 'Adoul authentifiée près la cour d\'appel d\'Agadir',
+    'mentions_body_address' => 'Bensergao, à proximité du Tribunal de Première Instance, Agadir, Maroc',
+    'mentions_body_phone' => '05 28 38 07 19',
+    'mentions_body_email' => 'sana.bouhamidi@gmail.com',
+    'mentions_body_hosting' => 'Hébergement : Hetzner Online GmbH, Francfort, Allemagne',
+    'mentions_body_ice' => 'ICE :',
+    'mentions_body_if' => 'IF :',
+
+    'privacy_body_intro' => 'Le cabinet Maître Sana Bouhamidi collecte et traite vos données personnelles dans le cadre de ses activités notariales.',
+    'privacy_data_title' => 'Données collectées',
+    'privacy_data_text' => 'Nous collectons les informations que vous nous fournissez directement : nom, email, téléphone, adresse, pièces d\'identité et documents relatifs à votre dossier.',
+    'privacy_purpose_title' => 'Finalités et base légale',
+    'privacy_purpose_text' => 'Vos données sont traitées pour la gestion de votre dossier, la prise de rendez-vous, la communication et le respect de nos obligations légales et réglementaires.',
+    'privacy_retention_title' => 'Durée de conservation',
+    'privacy_retention_text' => 'Vos données sont conservées pendant la durée nécessaire à la gestion de votre dossier et conformément aux obligations légales de conservation (10 ans pour les actes authentiques).',
+    'privacy_rights_title' => 'Vos droits',
+    'privacy_rights_text' => 'Conformément à la loi 09-08, vous disposez d\'un droit d\'accès, de rectification, d\'opposition et de suppression de vos données. Pour exercer ces droits, contactez-nous par email.',
+    'privacy_cookie_title' => 'Cookies',
+    'privacy_cookie_text' => 'Ce site utilise uniquement des cookies strictement nécessaires à son fonctionnement (session, langue, CSRF). Aucun cookie publicitaire ou de traçage n\'est utilisé.',
+    'privacy_cndp' => 'Vous avez le droit d\'introduire une réclamation auprès de la CNDP (Commission Nationale de Contrôle de la Protection des Données à Caractère Personnel).',
+
+    'terms_body_intro' => 'En accédant à ce site, vous acceptez les présentes conditions d\'utilisation.',
+    'terms_content_title' => 'Contenu du site',
+    'terms_content_text' => 'Les informations fournies sur ce site le sont à titre indicatif et ne constituent pas un avis juridique. Seule une consultation avec Maître Bouhamidi peut vous apporter une réponse adaptée à votre situation.',
+    'terms_booking_title' => 'Prise de rendez-vous',
+    'terms_booking_text' => 'La prise de rendez-vous en ligne est un service de mise en relation. L\'annulation d\'un rendez-vous doit être effectuée au moins 24 heures à l\'avance.',
+    'terms_fees_title' => 'Honoraires',
+    'terms_fees_text' => 'Les honoraires de consultation sont indiqués sur la page des plans de consultation. Les frais d\'authentification des actes sont déterminés lors de la consultation selon la nature et la complexité du dossier.',
+    'terms_responsibility_title' => 'Responsabilité',
+    'terms_responsibility_text' => 'Le cabinet Maître Sana Bouhamidi ne saurait être tenu responsable des dommages directs ou indirects résultant de l\'utilisation du site.',
+];
