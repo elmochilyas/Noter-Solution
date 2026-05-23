@@ -310,15 +310,15 @@ class CreateBooking extends Component
                 totalCentimes: $plan['price_centimes'],
             );
 
+            if ($this->isFreePlan() && $client->hasExceededFreeOrientationLimit()) {
+                throw new \RuntimeException(__('booking.errors.free_orientation_limit'));
+            }
+
             $booking = $bookingService->createPending($bookingData, $client);
 
             BookingCreated::dispatch($booking);
 
             if ($this->isFreePlan()) {
-                if ($client->hasExceededFreeOrientationLimit()) {
-                    throw new \RuntimeException(__('booking.errors.free_orientation_limit'));
-                }
-
                 $bookingService->confirm($booking);
                 $this->bookingReference = $booking->reference;
                 $this->bookingId = $booking->id;

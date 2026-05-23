@@ -99,8 +99,5 @@ test('createPending with free plan throws when limit exceeded', function () {
         locale: Locale::FR,
     );
 
-    $booking = $this->service->createPending($data, $this->client);
-
-    expect(fn () => throw new RuntimeException(__('booking.errors.free_orientation_limit')))
-        ->toThrow(RuntimeException::class);
-});
+    $this->service->createPending($data, $this->client);
+})->throws(RuntimeException::class, 'limit');

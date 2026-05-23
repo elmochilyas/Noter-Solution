@@ -72,6 +72,31 @@ test('createPending throws SlotNotAvailable when slot is already booked', functi
     $this->service->createPending($data, $this->client);
 })->throws(SlotNotAvailable::class);
 
+test('createPending throws when free orientation limit exceeded', function () {
+    $freePlan = ConsultationPlan::factory()->free()->create();
+
+    Booking::factory()->count(2)->create([
+        'client_id' => $this->client->id,
+        'status' => BookingStatus::CONFIRMED->value,
+        'total_centimes' => 0,
+        'created_at' => now()->subDay(),
+    ]);
+
+    $data = new BookingData(
+        consultationPlanId: $freePlan->id,
+        serviceCategory: ServiceCategory::FAMILY,
+        format: BookingFormat::ONLINE,
+        slot: $this->slot,
+        clientFullName: 'Test User',
+        clientEmail: 'test@example.com',
+        clientPhone: MoroccanPhoneNumber::fromInput('0612345678'),
+        description: 'Free booking exceeding limit',
+        locale: Locale::FR,
+    );
+
+    $this->service->createPending($data, $this->client);
+})->throws(RuntimeException::class, 'limit');
+
 test('confirm changes booking status to confirmed and dispatches event', function () {
     Event::fake();
 

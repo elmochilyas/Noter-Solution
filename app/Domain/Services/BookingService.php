@@ -29,6 +29,10 @@ final class BookingService
     public function createPending(BookingData $data, ?Client $client = null): Booking
     {
         return DB::transaction(function () use ($data, $client) {
+            if ($client && $data->totalCentimes === 0 && $client->hasExceededFreeOrientationLimit()) {
+                throw new \RuntimeException('Free orientation limit reached. Maximum 2 per 90 days.');
+            }
+
             $this->availability->assertSlotIsFree($data->slot, $data->format);
 
             $booking = new Booking;
