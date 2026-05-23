@@ -52,3 +52,21 @@ test('confirmFromWebhook marks payment failed', function () {
     $fresh = Payment::find($payment->id);
     expect($fresh->status)->toBe(PaymentStatus::FAILED->value);
 });
+
+test('confirmFromWebhook handles canceled intent as failed', function () {
+    $payment = Payment::factory()->create([
+        'gateway_intent_id' => 'pi_test_cancel',
+        'status' => PaymentStatus::PENDING->value,
+    ]);
+
+    $event = new GatewayWebhookEvent(
+        type: 'payment_intent.canceled',
+        id: 'evt_test_cancel',
+        data: ['id' => 'pi_test_cancel'],
+    );
+
+    $this->service->confirmFromWebhook($event);
+
+    $fresh = Payment::find($payment->id);
+    expect($fresh->status)->toBe(PaymentStatus::FAILED->value);
+});

@@ -69,6 +69,11 @@ final class PaymentService
             $payment->save();
 
             PaymentFailed::dispatch($payment);
+        } elseif ($event->type === 'payment_intent.canceled') {
+            $payment->status = PaymentStatus::FAILED->value;
+            $payment->save();
+
+            PaymentFailed::dispatch($payment);
         }
     }
 

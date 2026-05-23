@@ -108,6 +108,28 @@ test('confirmFromWebhook marks payment as failed and dispatches PaymentFailed', 
     Event::assertDispatched(PaymentFailed::class);
 });
 
+test('confirmFromWebhook handles canceled intent as failed', function () {
+    Event::fake();
+
+    $payment = Payment::factory()->create([
+        'gateway_intent_id' => 'pi_cancel',
+        'status' => PaymentStatus::PENDING->value,
+    ]);
+
+    $webhookEvent = new GatewayWebhookEvent(
+        type: 'payment_intent.canceled',
+        id: 'evt_789',
+        data: ['id' => 'pi_cancel', 'amount' => 25000],
+    );
+
+    $this->service->confirmFromWebhook($webhookEvent);
+
+    $payment->refresh();
+    expect($payment->status)->toBe(PaymentStatus::FAILED->value);
+
+    Event::assertDispatched(PaymentFailed::class);
+});
+
 test('refund creates a refund request record', function () {
     $payment = Payment::factory()->create(['amount_centimes' => 25000]);
     $user = User::factory()->create();

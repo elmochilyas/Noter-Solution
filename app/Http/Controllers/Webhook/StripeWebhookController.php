@@ -64,6 +64,7 @@ class StripeWebhookController extends Controller
         try {
             $this->payments->confirmFromWebhook(new GatewayWebhookEvent(
                 type: $event->type,
+                id: $event->id,
                 data: json_decode($payload, true)['data']['object'],
             ));
 
