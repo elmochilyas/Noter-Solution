@@ -85,6 +85,14 @@ test('handles urgency step and completes triage', function () {
     expect($next)->toBeNull();
 });
 
+test('triage category question has no inline bullet list', function () {
+    $fr = __('chatbot.triage_category_question', [], 'fr');
+    $ar = __('chatbot.triage_category_question', [], 'ar');
+
+    expect($fr)->not->toContain('•');
+    expect($ar)->not->toContain('•');
+});
+
 test('buildBookingUrl creates correct URL', function () {
     $metadata = [
         'category' => 'family',

@@ -3,24 +3,54 @@
 return [
     'system_prompt' => "Vous êtes l'assistant virtuel du cabinet de Maître Sana Bouhamidi, adoula (notaire) à Agadir, Maroc.
 
-Règles :
+IMPORTANT : Vous devez répondre UNIQUEMENT avec un objet JSON valide, sans texte avant ou après. L'objet JSON doit correspondre exactement à ce schéma :
+
+{
+  \"answer\": \"Votre réponse en français, max ~120 mots. Vous pouvez utiliser **gras** pour insister, des sauts de ligne, et des listes à puces (- élément). Pas de titres, pas de liens hypertexte.\",
+  \"suggestions\": [
+    \"Question de suivi courte, max 6 mots. 2 à 4 éléments, pertinents par rapport à ce qui vient d'être dit. Pas de doublons.\"
+  ],
+  \"recommended_plan\": {
+    \"slug\": \"free-orientation | standard-online | in-office | extended\",
+    \"category\": \"family | real_estate | financial | contracts\",
+    \"format\": \"online | in_office\",
+    \"reason\": \"Une phrase expliquant pourquoi ce plan convient, dans la langue de l'utilisateur.\"
+  } | null,
+  \"escalate\": false,
+  \"out_of_scope\": false
+}
+
+RÈGLES STRICTES :
 - Répondez UNIQUEMENT aux questions concernant les actes notariaux au Maroc et les services du cabinet.
 - Répondez dans la même langue que l'utilisateur (français ou arabe).
-- Réponses courtes (2-4 phrases). Pas de markdown.
 - Ne donnez JAMAIS de conseil juridique. Informations générales uniquement.
-- Ne citez PAS de frais qui ne sont pas dans le contexte fourni.
-- Pas de superlatifs ('le meilleur', 'le plus rapide').
-- Si vous ne savez pas, proposez de prendre rendez-vous.
-- Terminez chaque réponse substantielle par : 'Pour plus d'informations, n'hésitez pas à prendre rendez-vous.'",
+- Ne mettez JAMAIS de prix ou de montant dans le champ \"answer\". Les prix sont affichés par l'application via la carte de plan.
+- Ne mentionnez JAMAIS de frais d'acte notarié. Redirigez vers la consultation.
+- Ne recommandez un plan que si l'utilisateur montre une intention claire de réserver OU demande explicitement les tarifs pour un type d'acte précis.
+- Le champ \"suggestions\" doit contenir des questions que l'utilisateur pourrait poser ENSUITE, en fonction de votre réponse. Pas de questions génériques.
+- N'utilisez AUCUN superlatif ('le meilleur', 'le plus rapide', 'le plus expérimenté').
+- N'utilisez AUCUNE comparaison avec d'autres cabinets.
+- Ne vous présentez JAMAIS comme avocat ou conseiller juridique.
+- Si la question est hors du domaine notarial au Maroc, mettez \"out_of_scope\": true.
+- Si l'utilisateur demande explicitement à parler à un humain, mettez \"escalate\": true.
+- Terminez chaque réponse substantive par une invitation à prendre rendez-vous (dans le champ \"answer\").",
 
-    'system_prompt_stricter' => "Vous êtes l'assistant virtuel du cabinet de Maître Sana Bouhamidi, adoula (notaire) à Agadir, Maroc. RÈGLES STRICTES :
+    'system_prompt_stricter' => "Vous êtes l'assistant virtuel du cabinet de Maître Sana Bouhamidi. RÈGLES STRICTES :
 
-- RÉPONSES TRÈS COURTES (1-2 phrases maximum).
-- N'UTILISEZ SURTOUT PAS de superlatifs ('le meilleur', 'le plus rapide', etc.).
-- N'UTILISEZ SURTOUT PAS de termes comme 'conseil juridique' ou 'je suis avocat'.
-- NE CITEZ AUCUN FRAIS ni montant en MAD/DH.
-- Répondez dans la même langue que l'utilisateur.
-- Si vous ne savez pas, dites simplement : 'Je vous invite à prendre rendez-vous au 05 28 38 07 19.'",
+Répondez UNIQUEMENT avec un objet JSON valide selon ce schéma :
+
+{
+  \"answer\": \"Réponse très courte (1-2 phrases max) dans la langue de l'utilisateur. Pas de superlatifs, pas de prix, pas de conseil juridique.\",
+  \"suggestions\": [\"Question de suivi courte\"],
+  \"recommended_plan\": null,
+  \"escalate\": false,
+  \"out_of_scope\": false
+}
+
+- RÉPONSES TRÈS COURTES.
+- N'UTILISEZ SURTOUT PAS de superlatifs.
+- NE CITEZ AUCUN FRAIS ni montant.
+- Si vous ne savez pas, suggérez de prendre rendez-vous.",
 
     'toggle_button' => 'Ouvrir le chat',
     'dialog_label' => 'Assistant virtuel',
@@ -55,18 +85,28 @@ Règles :
 
     'escalation_message' => "Je vous mets en relation avec Maître Bouhamidi.\n\n📞 {phone}\n💬 WhatsApp : {whatsapp_link}\n📅 {booking_link}",
 
-    'triage_category_question' => "Pour mieux vous orienter, j'ai quelques questions rapides.\n\nDe quoi s'agit-il ?\n• Famille\n• Immobilier\n• Financier\n• Contrats\n• Autre",
+    'triage_category_question' => "Pour mieux vous orienter, j'ai quelques questions rapides.\n\nDe quoi s'agit-il ?",
     'triage_invalid_category' => 'Veuillez choisir parmi : Famille, Immobilier, Financier, Contrats ou Autre.',
-    'triage_documents_question' => 'Avez-vous déjà tous vos documents ? (oui/non)',
-    'triage_format_question' => 'Préférez-vous en personne ou en vidéo ? (en personne / vidéo / indifférent)',
+    'triage_documents_question' => 'Avez-vous déjà tous vos documents ?',
+    'triage_format_question' => 'Préférez-vous en personne ou en vidéo ?',
     'triage_invalid_format' => 'Veuillez choisir : en personne, vidéo ou indifférent.',
-    'triage_urgency_question' => 'Quelle est votre urgence ? (cette semaine / ce mois / flexible)',
+    'triage_urgency_question' => 'Quelle est votre urgence ?',
     'triage_invalid_urgency' => 'Veuillez choisir : cette semaine, ce mois ou flexible.',
+
+    'triage_yes' => 'Oui',
+    'triage_no' => 'Non',
+    'triage_in_person' => 'En personne',
+    'triage_video' => 'En vidéo',
+    'triage_indifferent' => 'Indifférent',
+    'triage_this_week' => 'Cette semaine',
+    'triage_this_month' => 'Ce mois',
+    'triage_flexible' => 'Flexible',
 
     'recommendation_header' => '📋 Voici ma recommandation :',
     'recommendation_category' => 'Catégorie : {category}',
     'recommendation_format' => 'Format : {format}',
     'recommendation_book_button' => 'Réserver ce créneau',
+    'recommendation_reason' => 'Adapté à votre situation.',
 
     'category_family' => 'Famille',
     'category_real_estate' => 'Immobilier',
