@@ -259,7 +259,7 @@ final class ChatbotService
         iterable $faqs,
         string $locale,
     ): ChatbotResponse {
-        $systemPrompt = __(self::SYSTEM_PROMPT_KEY, [], $locale);
+        $systemPrompt = $this->buildSystemPrompt($locale);
         $llmMessages = $this->buildLlmMessages($history, $userMessage, $faqContext);
 
         try {
@@ -271,10 +271,11 @@ final class ChatbotService
 
             $llmResponse = $this->llm->complete($request);
 
-            $parsed = $this->parser->parse($llmResponse->content, $locale);
+            $parsed = $this->parser->parse($llmResponse->content, $locale, (string) $conversation->id);
 
-            $cleaned = $this->filter->clean($parsed->answer);
-            $violations = $this->filter->violationCount($parsed->answer);
+            $allowedAmounts = $this->filter->getAllowedAmounts();
+            $cleaned = $this->filter->clean($parsed->answer, $allowedAmounts);
+            $violations = $this->filter->violationCount($parsed->answer, $locale, $allowedAmounts);
 
             if ($violations >= 2) {
                 Log::warning('Chatbot output filter: 2+ violations, escalate', [
@@ -296,7 +297,7 @@ final class ChatbotService
                     'conversation_id' => $conversation->id,
                 ]);
 
-                $stricterPrompt = __(self::STRICTER_SYSTEM_PROMPT_KEY, [], $locale);
+                $stricterPrompt = $this->buildStricterPrompt($locale);
                 $stricterRequest = new LlmRequest(
                     system: $stricterPrompt,
                     messages: $llmMessages,
@@ -306,11 +307,11 @@ final class ChatbotService
                 );
 
                 $regenerated = $this->llm->complete($stricterRequest);
-                $reParsed = $this->parser->parse($regenerated->content, $locale);
-                $reViolations = $this->filter->violationCount($reParsed->answer);
+                $reParsed = $this->parser->parse($regenerated->content, $locale, (string) $conversation->id);
+                $reViolations = $this->filter->violationCount($reParsed->answer, $locale, $allowedAmounts);
 
                 if ($reViolations > 0) {
-                    $cleaned = $this->filter->clean($reParsed->answer);
+                    $cleaned = $this->filter->clean($reParsed->answer, $allowedAmounts);
 
                     $parsed = new ChatbotResponse(
                         answer: $cleaned."\n\n".__('chatbot.escalation_suggestion', [], $locale),
@@ -435,6 +436,30 @@ final class ChatbotService
         $messages[] = ['role' => 'user', 'content' => $content];
 
         return $messages;
+    }
+
+    private function buildSystemPrompt(string $locale): string
+    {
+        $base = __(self::SYSTEM_PROMPT_KEY, [], $locale);
+
+        $examples = config('chatbot.few_shot_examples', []);
+
+        if (empty($examples)) {
+            return $base;
+        }
+
+        $parts = [$base, "\n\nEXEMPLES DE RÉPONSES :"];
+
+        foreach ($examples as $label => $example) {
+            $parts[] = "\n--- {$label} ---\nUtilisateur : {$example['user']}\nAssistant : {$example['assistant']}";
+        }
+
+        return implode("\n", $parts);
+    }
+
+    private function buildStricterPrompt(string $locale): string
+    {
+        return __(self::STRICTER_SYSTEM_PROMPT_KEY, [], $locale);
     }
 
     private function getConversationHistory(ChatbotConversation $conversation): array
