@@ -104,6 +104,25 @@ return [
                 "out_of_scope": false
             }',
         ],
+        'pricing_query' => [
+            'user' => 'Combien coûte une consultation ?',
+            'assistant' => '{
+                "answer": "Voici les tarifs de consultation chez Maître Bouhamidi :\\n\\n- **Orientation gratuite** : 0 MAD — pour une première orientation\\n- **Consultation standard en visio** : 250 MAD — pour la plupart des démarches\\n- **Consultation au cabinet** : 400 MAD — pour un accompagnement personnalisé\\n- **Consultation étendue** : 800 MAD — pour les dossiers complexes\\n\\nLes frais d\'acte notarié ne sont pas inclus et vous seront communiqués lors de la consultation selon votre dossier. Souhaitez-vous réserver une consultation ?",
+                "suggestions": [
+                    "Quelle différence avec l\'orientation gratuite ?",
+                    "Puis-je venir au cabinet ?",
+                    "Combien de temps dure une consultation ?"
+                ],
+                "recommended_plan": {
+                    "slug": "standard-online",
+                    "category": "other",
+                    "format": "online",
+                    "reason": "La consultation standard en visio à 250 MAD vous permet d\'obtenir toutes les informations nécessaires depuis chez vous."
+                },
+                "escalate": false,
+                "out_of_scope": false
+            }',
+        ],
         'out_of_scope' => [
             'user' => 'Quel temps fait-il demain ?',
             'assistant' => '{
