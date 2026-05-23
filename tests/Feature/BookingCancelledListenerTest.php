@@ -80,6 +80,29 @@ test('IssueRefundIfApplicable creates no refund when cancelled less than 2h befo
     expect($payment->refunds)->toBeEmpty();
 });
 
+test('IssueRefundIfApplicable does nothing for rescheduled bookings', function () {
+    $booking = Booking::factory()->create([
+        'starts_at' => Carbon::parse('+36 hours'),
+        'ends_at' => Carbon::parse('+37 hours'),
+        'status' => BookingStatus::CANCELLED->value,
+        'cancelled_at' => now(),
+        'cancellation_reason' => 'rescheduled',
+    ]);
+
+    $payment = Payment::factory()->succeeded()->create([
+        'booking_id' => $booking->id,
+        'gateway' => 'stripe',
+        'amount_centimes' => 50000,
+    ]);
+
+    $service = app(PaymentService::class);
+    $listener = new IssueRefundIfApplicable($service);
+    $listener->handle(new BookingCancelled($booking));
+
+    $payment->refresh();
+    expect($payment->refunds)->toBeEmpty();
+});
+
 test('IssueRefundIfApplicable does nothing for cash payments', function () {
     $booking = Booking::factory()->create([
         'starts_at' => Carbon::parse('+36 hours'),

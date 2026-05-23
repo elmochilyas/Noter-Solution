@@ -21,6 +21,10 @@ final class IssueRefundIfApplicable
             return;
         }
 
+        if ($booking->cancellation_reason === 'rescheduled') {
+            return;
+        }
+
         $payment = $booking->payment;
 
         if (! $payment || $payment->gateway === 'cash') {
