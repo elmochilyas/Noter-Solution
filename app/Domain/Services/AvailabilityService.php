@@ -146,7 +146,7 @@ final class AvailabilityService
             'slot_ends_at' => $slot->endsAt,
             'client_id' => $client?->id,
             'session_id' => $sessionId,
-            'expires_at' => now()->addMinutes(15),
+            'expires_at' => now()->addMinutes(10),
         ]);
     }
 }

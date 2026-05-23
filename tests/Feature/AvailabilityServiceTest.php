@@ -149,7 +149,7 @@ test('availableSlots accepts correct argument order (from, to, plan, format)', f
     expect($slots[0])->toBeInstanceOf(TimeSlot::class);
 });
 
-test('holdSlot creates a hold with 15 minute expiry', function () {
+test('holdSlot creates a hold with 10 minute expiry', function () {
     $slot = new TimeSlot(
         CarbonImmutable::parse('+7 days 10:00'),
         CarbonImmutable::parse('+7 days 10:30'),
@@ -158,5 +158,5 @@ test('holdSlot creates a hold with 15 minute expiry', function () {
     $hold = $this->service->holdSlot($slot, 'test-session');
 
     expect($hold)->toBeInstanceOf(BookingHold::class)
-        ->expires_at->toBeGreaterThan(now()->addMinutes(14));
+        ->expires_at->toBeGreaterThan(now()->addMinutes(9));
 });
