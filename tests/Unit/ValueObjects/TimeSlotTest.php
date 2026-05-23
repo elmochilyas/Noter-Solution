@@ -82,6 +82,14 @@ test('contains checks moment within slot', function () {
     expect($slot->contains(CarbonImmutable::parse('2026-06-01 11:00')))->toBeFalse();
 });
 
+test('fromIso creates TimeSlot from ISO string and duration', function () {
+    $slot = TimeSlot::fromIso('2026-06-15T14:00:00+00:00', 60);
+
+    expect($slot->startsAt->toIso8601String())->toBe('2026-06-15T14:00:00+00:00');
+    expect($slot->endsAt->toIso8601String())->toBe('2026-06-15T15:00:00+00:00');
+    expect($slot->durationMinutes())->toBe(60);
+});
+
 test('isPast returns false for future slot', function () {
     $slot = new TimeSlot(
         CarbonImmutable::now()->addDay(),

@@ -37,4 +37,11 @@ final readonly class TimeSlot
     {
         return $this->endsAt->isPast();
     }
+
+    public static function fromIso(string $iso, int $durationMinutes): self
+    {
+        $startsAt = CarbonImmutable::parse($iso);
+
+        return new self($startsAt, $startsAt->addMinutes($durationMinutes));
+    }
 }
