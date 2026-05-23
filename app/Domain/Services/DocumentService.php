@@ -2,11 +2,13 @@
 
 namespace App\Domain\Services;
 
+use App\Jobs\ScanDocumentForViruses;
 use App\Models\Booking;
 use App\Models\Client;
 use App\Models\Document;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 final class DocumentService
@@ -23,7 +25,8 @@ final class DocumentService
             $extension,
         );
 
-        $file->storeAs(dirname($storagePath), basename($storagePath), config('filesystems.default'));
+        Storage::disk(config('filesystems.default'))
+            ->put($storagePath, file_get_contents($file->getRealPath()));
 
         $document = Document::create([
             'uuid' => $uuid,
@@ -36,6 +39,8 @@ final class DocumentService
             'scan_status' => 'pending',
             'purge_after' => now()->addDays(90),
         ]);
+
+        ScanDocumentForViruses::dispatch($document);
 
         return $document;
     }

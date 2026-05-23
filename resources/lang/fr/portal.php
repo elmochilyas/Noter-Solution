@@ -86,4 +86,6 @@ return [
     'reschedule_no_slots' => 'Aucun créneau disponible pour les 14 prochains jours.',
     'reschedule_no_slots_help' => 'Veuillez réessayer plus tard ou nous contacter.',
     'reschedule_invalid' => 'Le créneau sélectionné n\'est pas valide.',
+
+    'currency' => 'MAD',
 ];

@@ -8,6 +8,13 @@ return [
     'breadcrumb_home' => 'Accueil',
     'breadcrumb_services' => 'Services',
 
+    'categories' => [
+        'family' => 'Actes Familiaux',
+        'real_estate' => 'Immobilier',
+        'financial' => 'Entreprise & Commerce',
+        'contracts' => 'Contentieux & Recouvrement',
+    ],
+
     'category_actes_familiaux' => 'Actes Familiaux',
     'category_immobilier' => 'Immobilier',
     'category_entreprise' => 'Entreprise & Commerce',

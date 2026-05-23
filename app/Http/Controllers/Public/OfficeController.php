@@ -11,6 +11,6 @@ class OfficeController extends Controller
     {
         $practice = Setting::practiceInfo();
 
-        return view('public.contact', compact('practice'));
+        return view('public.office', compact('practice'));
     }
 }

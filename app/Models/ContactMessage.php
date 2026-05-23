@@ -19,6 +19,8 @@ class ContactMessage extends Model
         'message',
         'ip',
         'user_agent',
+        'preferred_channel',
+        'accepted_marketing',
         'is_handled',
         'handled_by',
         'handled_at',

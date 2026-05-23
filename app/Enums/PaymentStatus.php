@@ -10,6 +10,11 @@ enum PaymentStatus: string
     case REFUNDED = 'refunded';
     case PARTIALLY_REFUNDED = 'partially_refunded';
 
+    public function label(): string
+    {
+        return __("payment.status.{$this->value}");
+    }
+
     public function isFinal(): bool
     {
         return match ($this) {

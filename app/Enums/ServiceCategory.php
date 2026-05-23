@@ -8,4 +8,9 @@ enum ServiceCategory: string
     case REAL_ESTATE = 'real_estate';
     case FINANCIAL = 'financial';
     case CONTRACTS = 'contracts';
+
+    public function label(): string
+    {
+        return __("services.categories.{$this->value}");
+    }
 }

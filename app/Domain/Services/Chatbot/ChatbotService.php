@@ -39,7 +39,14 @@ final class ChatbotService
             ->first();
 
         if ($existing) {
-            return $existing;
+            $timeoutMinutes = (int) config('chatbot.idle_timeout_minutes', 15);
+
+            if ($existing->last_message_at && $existing->last_message_at->lessThan(now()->subMinutes($timeoutMinutes))) {
+                $existing->ended_at = now();
+                $existing->save();
+            } else {
+                return $existing;
+            }
         }
 
         return ChatbotConversation::create([
@@ -55,6 +62,18 @@ final class ChatbotService
 
     public function respondTo(ChatbotConversation $conversation, string $userMessage): Generator
     {
+        $timeoutMinutes = (int) config('chatbot.idle_timeout_minutes', 15);
+
+        if ($conversation->last_message_at && $conversation->last_message_at->lessThan(now()->subMinutes($timeoutMinutes))) {
+            $conversation->ended_at = now();
+            $conversation->save();
+
+            $locale = $conversation->locale;
+            yield __('chatbot.session_expired', [], $locale);
+
+            return;
+        }
+
         $userMessage = mb_substr(trim($userMessage), 0, self::MAX_INPUT_LENGTH);
 
         if ($userMessage === '') {

@@ -27,4 +27,6 @@ return [
 
     'cta_title' => 'Réservez votre consultation',
     'cta_button' => 'Prendre rendez-vous',
+
+    'portrait_alt' => 'Portrait de Maître Sana Bouhamidi',
 ];

@@ -1,6 +1,8 @@
 <?php
 
+use App\Exceptions\Sentry\BeforeSendHandler;
 use Sentry\Event;
+use Sentry\EventHint;
 
 return [
     'dsn' => env('SENTRY_LARAVEL_DSN'),
@@ -21,13 +23,9 @@ return [
 
     'enable_tracing' => env('SENTRY_TRACES_SAMPLE_RATE', 0) > 0,
 
-    'before_send' => function (Event $event): ?Event {
-        $tags = $event->getTags();
+    'before_send' => function (Event $event, ?EventHint $hint): ?Event {
+        $handler = new BeforeSendHandler;
 
-        if (isset($tags['route']) && str_starts_with((string) $tags['route'], 'filament.')) {
-            return null;
-        }
-
-        return $event;
+        return $handler($event, $hint);
     },
 ];

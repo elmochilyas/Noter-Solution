@@ -9,6 +9,7 @@ use App\Events\ContactMessageReceived;
 use App\Events\MagicLinkRequested;
 use App\Events\PaymentFailed;
 use App\Events\PaymentSucceeded;
+use App\Events\ReceiptGenerated;
 use App\Events\RefundIssued;
 use App\Listeners\ConfirmBooking;
 use App\Listeners\GenerateCreditNote;
@@ -23,6 +24,7 @@ use App\Listeners\SendBookingConfirmationNotifications;
 use App\Listeners\SendBookingRescheduledNotifications;
 use App\Listeners\SendContactMessageNotification;
 use App\Listeners\SendMagicLinkNotification;
+use App\Listeners\SendReceiptNotification;
 use App\Listeners\SendRefundIssuedNotification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -67,6 +69,10 @@ class EventServiceProvider extends ServiceProvider
 
         MagicLinkRequested::class => [
             SendMagicLinkNotification::class,
+        ],
+
+        ReceiptGenerated::class => [
+            SendReceiptNotification::class,
         ],
 
         RefundIssued::class => [

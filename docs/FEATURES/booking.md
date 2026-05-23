@@ -13,8 +13,10 @@ Booking-flow screens in `DESIGN/screens-index.md`: #6 (slot picker), #7 (identit
 ```
 Plan selection ──→ Category & description ──→ Slot picker ──→ Identity ──→ Documents ──→ Payment ──→ Confirmation
        │                    │                      │              │            │             │             │
-      step 1               step 2                step 3         step 4       step 5        step 6      success
+      step 1               step 2                step 3        step 4       step 5        step 6      success
 ```
+
+> **Note:** The implementation uses 5 steps after plan selection (6 total). Identity (step 4) includes the document upload toggle. If "No documents" is selected, a "skip to payment" button is shown instead of the full document upload UI. The separate "Description" step from earlier designs was collapsed into step 2 (Category & description).
 
 Each step is a Livewire component. State persists across steps in a single Livewire form object so the user can navigate back without losing data.
 
@@ -31,7 +33,7 @@ Display: the 4 plan cards (reused from public site `FEATURES/public-site.md`). C
 - "Quelle est la matière de votre rendez-vous ?" — radio selection: Family / Real estate / Financial / Contracts / Other
   - Pre-filled if `?category=` provided.
 - "Décrivez brièvement votre situation" — textarea (20–2000 chars, 500 char visual recommendation)
-- "Avez-vous déjà tous vos documents ?" — Yes / No / Not sure
+- "Avez-vous déjà tous vos documents ?" — Yes / No (the "Not sure" option was collapsed into "Yes" — if uncertain, the client can upload whatever they have)
 - "Préférez-vous en personne ou en vidéo ?" — only shown if the selected plan has `format=both`
   - Pre-filled if `?format=` provided.
 
@@ -101,8 +103,7 @@ Form:
 - Loi 09-08 consent line: "Je consens au traitement de mes données conformément à la politique de confidentialité"
 
 If the email matches an existing Client:
-- Pre-fill known fields (name, phone, locale, CIN).
-- Show: "Bonjour [Prénom], nous avons déjà vos coordonnées. Vérifiez et continuez."
+- The existing Client record is reused (name, email, phone, national_id are carried over from the first booking).
 - Magic-link login NOT required — the booking flow continues as a guest write.
 - Booking will be linked to that Client.
 
@@ -116,7 +117,7 @@ Click "Continuer" → step 5 (or skip directly to step 6 if no documents needed)
 
 ## Step 5: Documents (optional)
 
-If the user said "Yes" or "Not sure" on having documents:
+If the user said "Yes" on having documents:
 - Allow upload of up to 5 files.
 - Each file: PDF, JPG, or PNG; max 10 MB.
 - Upload one at a time, progress bar per file.

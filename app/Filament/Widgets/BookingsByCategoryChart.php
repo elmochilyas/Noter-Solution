@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ServiceCategory;
 use App\Models\Booking;
 use Filament\Widgets\ChartWidget;
 
@@ -24,7 +25,7 @@ class BookingsByCategoryChart extends ChartWidget
                     'data' => $categories->values(),
                 ],
             ],
-            'labels' => $categories->keys()->map(fn ($key) => __("booking.category.{$key}"))->toArray(),
+            'labels' => $categories->keys()->map(fn ($key) => ServiceCategory::tryFrom($key)?->label() ?? $key)->toArray(),
         ];
     }
 

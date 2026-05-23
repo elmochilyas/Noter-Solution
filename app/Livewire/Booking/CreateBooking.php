@@ -88,6 +88,31 @@ class CreateBooking extends Component
         $this->step = 2;
     }
 
+    public function markHasDocuments(): void
+    {
+        $this->state->hasDocuments = true;
+    }
+
+    public function markNoDocuments(): void
+    {
+        $this->state->hasDocuments = false;
+    }
+
+    public function selectCategory(string $value): void
+    {
+        $this->state->category = $value;
+    }
+
+    public function selectFormat(string $value): void
+    {
+        $this->state->format = $value;
+    }
+
+    public function selectChannel(string $value): void
+    {
+        $this->state->preferredChannel = $value;
+    }
+
     public function submitStep2(): void
     {
         $this->validate([

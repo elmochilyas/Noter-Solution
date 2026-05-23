@@ -39,5 +39,7 @@ return [
     'form_validation_message_max' => 'Le message ne doit pas dépasser 2000 caractères.',
     'form_validation_preferred_contact_required' => 'Veuillez choisir un moyen de contact préféré.',
     'form_validation_rate_limit' => 'Trop de tentatives. Veuillez réessayer plus tard.',
+    'form_marketing_consent' => 'J\'accepte de recevoir des communications du cabinet Sana Bouhamidi concernant mes démarches et les actualités juridiques.',
+    'form_validation_marketing_required' => 'Veuillez accepter de recevoir des communications.',
     'form_validation_captcha' => 'Veuillez confirmer que vous n\'êtes pas un robot.',
 ];

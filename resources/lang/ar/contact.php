@@ -39,5 +39,7 @@ return [
     'form_validation_message_max' => 'يجب ألا تتجاوز الرسالة 2000 حرف.',
     'form_validation_preferred_contact_required' => 'يرجى اختيار وسيلة الاتصال المفضلة.',
     'form_validation_rate_limit' => 'محاولات كثيرة. يرجى المحاولة لاحقًا.',
+    'form_marketing_consent' => 'أوافق على تلقي اتصالات من مكتب سناء بوحميدي بشأن إجراءاتي والمستجدات القانونية.',
+    'form_validation_marketing_required' => 'يرجى الموافقة على تلقي الاتصالات.',
     'form_validation_captcha' => 'يرجى تأكيد أنك لست برنامجًا آليًا.',
 ];

@@ -51,7 +51,7 @@ final class NotificationService
             templateKey: 'booking.reminder.'.$type,
             recipient: $booking->client,
             data: ['booking' => $booking, 'type' => $type],
-            channels: ['mail'],
+            channels: ['mail', 'sms', 'whatsapp'],
             notification: new BookingReminder($booking, $type),
         );
     }

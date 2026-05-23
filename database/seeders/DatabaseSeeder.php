@@ -189,24 +189,56 @@ class DatabaseSeeder extends Seeder
                 'title_fr' => 'Actes Familiaux',
                 'title_ar' => 'العقود الأسرية',
                 'icon' => 'heart',
+                'transactions' => [
+                    'fr' => ['Mariage', 'Divorce', 'Reconnaissance d\'enfant', 'Adoption', 'Succession', 'Testament'],
+                    'ar' => ['الزواج', 'الطلاق', 'إثبات النسب', 'التبني', 'الإرث', 'الوصية'],
+                ],
+                'documents' => [
+                    'fr' => ['Acte de mariage original', 'Pièce d\'identité des époux', 'Certificat de résidence', 'Acte de naissance'],
+                    'ar' => ['عقد الزواج الأصلي', 'بطاقة تعريف الزوجين', 'شهادة السكنى', 'شهادة الميلاد'],
+                ],
             ],
             [
                 'slug' => 'immobilier',
                 'title_fr' => 'Immobilier',
                 'title_ar' => 'العقارات',
                 'icon' => 'home',
+                'transactions' => [
+                    'fr' => ['Achat', 'Vente', 'Location', 'Hypothèque', 'Copropriété', 'Viager'],
+                    'ar' => ['الشراء', 'البيع', 'الكراء', 'الرهن العقاري', 'الملكية المشتركة', 'البيع مدى الحياة'],
+                ],
+                'documents' => [
+                    'fr' => ['Titre de propriété', 'Acte notarié', 'Certificat de propriété', 'Plans cadastraux'],
+                    'ar' => ['سند الملكية', 'العقد الموثق', 'شهادة الملكية', 'المخططات العقارية'],
+                ],
             ],
             [
                 'slug' => 'entreprise',
                 'title_fr' => 'Entreprise & Commerce',
                 'title_ar' => 'الأعمال والتجارة',
                 'icon' => 'briefcase',
+                'transactions' => [
+                    'fr' => ['Création de société', 'Cession', 'Fusion', 'Dissolution', 'Dépôt de marque'],
+                    'ar' => ['تأسيس شركة', 'التنازل', 'الاندماج', 'حل الشركة', 'إيداع علامة تجارية'],
+                ],
+                'documents' => [
+                    'fr' => ['Statuts de la société', 'Registre de commerce', 'Pièce d\'identité du gérant', 'Attestation CNSS'],
+                    'ar' => ['النظام الأساسي للشركة', 'السجل التجاري', 'بطاقة تعريف المسير', 'شهادة CNSS'],
+                ],
             ],
             [
                 'slug' => 'contentieux',
                 'title_fr' => 'Contentieux & Recouvrement',
                 'title_ar' => 'المنازعات والتحصيل',
                 'icon' => 'scale',
+                'transactions' => [
+                    'fr' => ['Recouvrement de créances', 'Contrat de recouvrement', 'Procédure judiciaire', 'Saisie'],
+                    'ar' => ['تحصيل الديون', 'عقد التحصيل', 'المسطرة القضائية', 'الحجز'],
+                ],
+                'documents' => [
+                    'fr' => ['Contrat original', 'Mise en demeure', 'Pièce d\'identité', 'Preuves de créance'],
+                    'ar' => ['العقد الأصلي', 'الإنذار', 'بطاقة التعريف', 'إثباتات الدين'],
+                ],
             ],
         ];
 
@@ -216,8 +248,8 @@ class DatabaseSeeder extends Seeder
                 'title_translations' => ['fr' => $svc['title_fr'], 'ar' => $svc['title_ar']],
                 'intro_translations' => ['fr' => 'Introduction pour '.$svc['title_fr'], 'ar' => 'مقدمة لـ '.$svc['title_ar']],
                 'body_translations' => ['fr' => 'Contenu détaillé pour '.$svc['title_fr'], 'ar' => 'محتوى مفصل لـ '.$svc['title_ar']],
-                'transactions_translations' => ['fr' => 'Transactions pour '.$svc['title_fr'], 'ar' => 'المعاملات لـ '.$svc['title_ar']],
-                'required_documents_translations' => ['fr' => 'Documents requis pour '.$svc['title_fr'], 'ar' => 'المستندات المطلوبة لـ '.$svc['title_ar']],
+                'transactions_translations' => $svc['transactions'],
+                'required_documents_translations' => $svc['documents'],
                 'icon' => $svc['icon'],
                 'display_order' => $i + 1,
                 'is_active' => true,
@@ -235,5 +267,7 @@ class DatabaseSeeder extends Seeder
                 'booking_id' => $booking->id,
             ]);
         });
+
+        $this->call(RealContentSeeder::class);
     }
 }

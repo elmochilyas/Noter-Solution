@@ -2,37 +2,39 @@
 
 @php
     $locale = app()->getLocale();
-    $titleKey = "legal.{$page}_title";
-    $introKey = "legal.{$page}_intro";
+    $keyPrefix = match ($page) {
+        'mentions-legales' => 'mentions',
+        'politique-confidentialite' => 'privacy',
+        'conditions-utilisation' => 'terms',
+        default => 'mentions',
+    };
+    $titleKey = "legal.{$keyPrefix}_title";
+    $introKey = "legal.{$keyPrefix}_intro";
 @endphp
 
 @section('title', __($titleKey) . ' — Sana Bouhamidi')
 @section('meta_description', __($introKey))
 
 @section('content')
-    {{-- Page intro --}}
-    <section class="pt-32 pb-16 px-4 max-w-4xl mx-auto">
-        <div class="flex flex-col items-center text-center">
-            <span class="text-sm font-semibold uppercase tracking-[0.1em] text-brass-500 mb-6 inline-flex items-center gap-4">
-                <span class="w-8 h-px bg-brass-500 block"></span>
-                {{ __($titleKey) }}
-                <span class="w-8 h-px bg-brass-500 block"></span>
-            </span>
-            <h1 class="text-4xl md:text-5xl font-semibold text-ink mb-6 leading-tight" style="font-family: var(--font-display-fr);">
-                {{ __($titleKey) }}
-            </h1>
-            <p class="text-lg text-stone-500 leading-relaxed max-w-2xl">
-                {{ __($introKey) }}
-            </p>
-        </div>
-    </section>
+    <x-public.page-hero
+        :label="__($titleKey)"
+        :title="__($titleKey)"
+        :description="__($introKey)"
+        accented
+    />
 
     {{-- Content --}}
-    <section class="pb-24 px-4 max-w-4xl mx-auto">
-        <div class="bg-white border border-stone-200 rounded-lg p-8 md:p-12">
-            <div class="prose prose-stone max-w-none prose-headings:text-ink prose-headings:font-semibold prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-lg prose-p:text-stone-600 prose-p:leading-relaxed prose-a:text-brass-500 prose-a:no-underline hover:prose-a:underline">
+    <section class="pb-24 px-4 max-w-4xl mx-auto reveal-up">
+        <div class="glass-card p-8 md:p-14">
+            <div class="prose prose-stone max-w-none
+                prose-headings:text-ink prose-headings:font-semibold
+                prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
+                prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3
+                prose-p:text-stone-500 prose-p:leading-relaxed
+                prose-a:text-brass-600 prose-a:no-underline hover:prose-a:underline
+                prose-ul:text-stone-500 prose-li:leading-relaxed">
                 @if ($page === 'mentions-legales')
-                    <p class="text-sm text-stone-500 mb-8">{{ __('legal.last_updated') }} : {{ now()->format('d/m/Y') }}</p>
+                    <p class="text-sm text-stone-400 mb-8 pb-6 border-b border-stone-100">{{ __('legal.last_updated') }} : {{ now()->format('d/m/Y') }}</p>
                     <h2>{{ __('legal.mentions_body_title') }}</h2>
                     <p><strong>{{ __('legal.mentions_body_name') }}</strong></p>
                     <p>{{ __('legal.mentions_body_title_profession') }}</p>
@@ -47,26 +49,31 @@
                         <p>{{ __('legal.mentions_body_if') }} {{ $practiceInfo['if'] }}</p>
                     @endif
                     @if (!empty($practiceInfo['rc']))
-                        <p>RC : {{ $practiceInfo['rc'] }}</p>
+                        <p>{{ __('legal.rc') }} {{ $practiceInfo['rc'] }}</p>
                     @endif
                     @if (!empty($practiceInfo['patente']))
-                        <p>Patente : {{ $practiceInfo['patente'] }}</p>
+                        <p>{{ __('legal.patente') }} {{ $practiceInfo['patente'] }}</p>
                     @endif
                     <p>{{ __('legal.mentions_body_hosting') }}</p>
                 @elseif ($page === 'politique-confidentialite')
-                    <p class="text-sm text-stone-500 mb-8">{{ __('legal.last_updated') }} : {{ now()->format('d/m/Y') }}</p>
+                    <p class="text-sm text-stone-400 mb-8 pb-6 border-b border-stone-100">{{ __('legal.last_updated') }} : {{ now()->format('d/m/Y') }}</p>
                     <p>{{ __('legal.privacy_body_intro') }}</p>
                     <h2>{{ __('legal.privacy_data_title') }}</h2>
                     <p>{{ __('legal.privacy_data_text') }}</p>
                     <h2>{{ __('legal.privacy_purpose_title') }}</h2>
                     <p>{{ __('legal.privacy_purpose_text') }}</p>
+                    <h2>{{ __('legal.privacy_recipients_title') }}</h2>
+                    <p>{{ __('legal.privacy_recipients_text') }}</p>
+                    <h2>{{ __('legal.privacy_transfers_title') }}</h2>
+                    <p>{{ __('legal.privacy_transfers_text') }}</p>
                     <h2>{{ __('legal.privacy_retention_title') }}</h2>
                     <p>{{ __('legal.privacy_retention_text') }}</p>
                     <h2>{{ __('legal.privacy_rights_title') }}</h2>
                     <p>{{ __('legal.privacy_rights_text') }}</p>
                     <h2>{{ __('legal.privacy_cookie_title') }}</h2>
                     <p>{{ __('legal.privacy_cookie_text') }}</p>
-                    <p>{{ __('legal.privacy_cndp') }}</p>
+                    <h2>{{ __('legal.privacy_cndp_title') }}</h2>
+                    <p>{{ __('legal.privacy_cndp_text') }}</p>
                 @elseif ($page === 'conditions-utilisation')
                     <p>{{ __('legal.terms_body_intro') }}</p>
                     <h2>{{ __('legal.terms_content_title') }}</h2>

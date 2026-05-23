@@ -23,4 +23,6 @@ return [
 
     'vat_disclaimer' => 'TVA incluse conformément à la législation marocaine.',
     'act_fee_disclaimer' => 'Ces frais couvrent uniquement la consultation. Les frais d\'authentification des actes sont déterminés séparément selon les tarifs professionnels et les spécificités de votre dossier.',
+
+    'currency' => 'MAD',
 ];

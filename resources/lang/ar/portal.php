@@ -86,4 +86,6 @@ return [
     'reschedule_no_slots' => 'لا توجد مواعيد متاحة للأيام الـ 14 القادمة.',
     'reschedule_no_slots_help' => 'يرجى المحاولة لاحقاً أو الاتصال بنا.',
     'reschedule_invalid' => 'الموعد المحدد غير صالح.',
+
+    'currency' => 'درهم',
 ];

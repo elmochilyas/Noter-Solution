@@ -8,6 +8,13 @@ return [
     'breadcrumb_home' => 'الرئيسية',
     'breadcrumb_services' => 'الخدمات',
 
+    'categories' => [
+        'family' => 'العقود الأسرية',
+        'real_estate' => 'العقارات',
+        'financial' => 'الأعمال والتجارة',
+        'contracts' => 'المنازعات والتحصيل',
+    ],
+
     'category_actes_familiaux' => 'العقود الأسرية',
     'category_immobilier' => 'العقارات',
     'category_entreprise' => 'الأعمال والتجارة',

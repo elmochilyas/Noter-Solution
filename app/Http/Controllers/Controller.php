@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use ReflectionMethod;
 
 abstract class Controller extends BaseController
 {
+    use AuthorizesRequests;
+
     public function callAction($method, $parameters): mixed
     {
         $route = request()->route();

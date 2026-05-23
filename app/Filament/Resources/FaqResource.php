@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\FaqResource\Pages;
 use App\Models\Faq;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -70,12 +71,14 @@ class FaqResource extends Resource
 
                 Section::make('Réponse')
                     ->components([
-                        TextInput::make('answer_translations.fr')
+                        Textarea::make('answer_translations.fr')
                             ->label('Réponse (FR)')
-                            ->required(),
-                        TextInput::make('answer_translations.ar')
+                            ->required()
+                            ->rows(4),
+                        Textarea::make('answer_translations.ar')
                             ->label('Réponse (AR)')
-                            ->required(),
+                            ->required()
+                            ->rows(4),
                     ]),
             ]);
     }

@@ -19,6 +19,10 @@ class ContactForm extends Component
 
     public string $honeypot = '';
 
+    public string $preferredChannel = 'email';
+
+    public bool $acceptedMarketing = false;
+
     public string $turnstileToken = '';
 
     public bool $succeeded = false;
@@ -30,6 +34,8 @@ class ContactForm extends Component
             'email' => 'required|email|max:255',
             'subject' => 'required|string|max:255',
             'message' => 'required|string|min:20|max:2000',
+            'preferredChannel' => 'required|in:phone,email,whatsapp',
+            'acceptedMarketing' => 'accepted',
             'honeypot' => 'prohibited',
         ];
     }
@@ -44,6 +50,8 @@ class ContactForm extends Component
             'message.required' => __('contact.form_validation_message_required'),
             'message.min' => __('contact.form_validation_message_min'),
             'message.max' => __('contact.form_validation_message_max'),
+            'preferredChannel.required' => __('contact.form_validation_preferred_contact_required'),
+            'acceptedMarketing.accepted' => __('contact.form_validation_marketing_required'),
             'honeypot.prohibited' => __('contact.form_validation_rate_limit'),
         ];
     }
@@ -84,11 +92,13 @@ class ContactForm extends Component
             'message' => $this->message,
             'ip' => $ip,
             'user_agent' => request()->userAgent(),
+            'preferred_channel' => $this->preferredChannel,
+            'accepted_marketing' => $this->acceptedMarketing,
         ]);
 
         event(new ContactMessageReceived($contactMessage));
 
-        $this->reset(['name', 'email', 'subject', 'message', 'honeypot', 'turnstileToken']);
+        $this->reset(['name', 'email', 'subject', 'message', 'preferredChannel', 'acceptedMarketing', 'honeypot', 'turnstileToken']);
         $this->succeeded = true;
     }
 

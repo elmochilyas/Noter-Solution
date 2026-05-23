@@ -54,7 +54,7 @@
 
     <div class="amount-box">
         <div class="label">@lang('notifications.refund_issued.amount', [], $locale)</div>
-        <div class="amount">{{ number_format($creditNote->amount_centimes / 100, 2, ',', ' ') }} MAD</div>
+        <div class="amount">{{ number_format($creditNote->amount_centimes / 100, 2, ',', ' ') }} {{ __('pdf.currency', [], $locale) }}</div>
     </div>
 
     @if($refund?->reason)

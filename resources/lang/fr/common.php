@@ -21,6 +21,7 @@ return [
     'call' => 'Appeler',
     'email' => 'Email',
     'whatsapp' => 'WhatsApp',
+    'sms' => 'SMS',
     'send' => 'Envoyer',
     'cancel' => 'Annuler',
     'close' => 'Fermer',
@@ -29,4 +30,6 @@ return [
     'coming_soon_desc' => 'Cette fonctionnalité sera disponible prochainement. En attendant, vous pouvez nous contacter par téléphone ou WhatsApp.',
     'chatbot_placeholder_title' => 'Assistant virtuel',
     'chatbot_placeholder_desc' => 'L\'assistant virtuel sera bientôt disponible. En attendant, vous pouvez nous contacter directement.',
+
+    'back_to_top' => 'Haut de page',
 ];

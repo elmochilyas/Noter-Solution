@@ -6,6 +6,7 @@ use App\Filament\Resources\ServiceResource\Pages;
 use App\Models\Service;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -80,10 +81,12 @@ class ServiceResource extends Resource
                             ->label('Introduction (AR)')
                             ->required()
                             ->maxLength(500),
-                        TextInput::make('body_translations.fr')
-                            ->label('Contenu (FR)'),
-                        TextInput::make('body_translations.ar')
-                            ->label('Contenu (AR)'),
+                        Textarea::make('body_translations.fr')
+                            ->label('Contenu (FR)')
+                            ->rows(6),
+                        Textarea::make('body_translations.ar')
+                            ->label('Contenu (AR)')
+                            ->rows(6),
                     ]),
 
                 Section::make('Transactions et documents')
