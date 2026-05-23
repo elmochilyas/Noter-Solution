@@ -3,6 +3,7 @@
 use App\Domain\Services\AvailabilityService;
 use App\Enums\BookingFormat;
 use App\Exceptions\Domain\SlotNotAvailable;
+use App\Models\AvailabilityException;
 use App\Models\AvailabilityRule;
 use App\Models\Booking;
 use App\Models\BookingHold;
@@ -94,6 +95,20 @@ test('assertSlotIsFree throws for booked slot', function () {
         'starts_at' => $slot->startsAt,
         'ends_at' => $slot->endsAt,
         'status' => 'confirmed',
+    ]);
+
+    $this->service->assertSlotIsFree($slot, BookingFormat::ONLINE);
+})->throws(SlotNotAvailable::class);
+
+test('assertSlotIsFree throws for slot in availability exception period', function () {
+    $slot = new TimeSlot(
+        CarbonImmutable::parse('+7 days 10:00'),
+        CarbonImmutable::parse('+7 days 10:30'),
+    );
+
+    AvailabilityException::factory()->create([
+        'starts_at' => $slot->startsAt->subHour(),
+        'ends_at' => $slot->endsAt->addHour(),
     ]);
 
     $this->service->assertSlotIsFree($slot, BookingFormat::ONLINE);

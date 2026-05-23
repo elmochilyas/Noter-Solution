@@ -130,7 +130,11 @@ final class AvailabilityService
             ->where('slot_ends_at', '>', $slot->startsAt)
             ->exists();
 
-        if ($overlapping || $held) {
+        $exception = AvailabilityException::where('starts_at', '<', $slot->endsAt)
+            ->where('ends_at', '>', $slot->startsAt)
+            ->exists();
+
+        if ($overlapping || $held || $exception) {
             throw new SlotNotAvailable;
         }
     }
