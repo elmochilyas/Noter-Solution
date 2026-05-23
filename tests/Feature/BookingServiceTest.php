@@ -8,6 +8,7 @@ use App\Enums\ServiceCategory;
 use App\Events\BookingConfirmed;
 use App\Events\BookingRescheduled;
 use App\Exceptions\Domain\InvalidBookingTransition;
+use App\Exceptions\Domain\SlotNotAvailable;
 use App\Models\Booking;
 use App\Models\Client;
 use App\Models\ConsultationPlan;
@@ -48,6 +49,28 @@ test('createPending creates a booking with pending_payment status', function () 
         ->status->toBe(BookingStatus::PENDING_PAYMENT->value)
         ->reference->not->toBeNull();
 });
+
+test('createPending throws SlotNotAvailable when slot is already booked', function () {
+    $existing = Booking::factory()->create([
+        'starts_at' => $this->slot->startsAt,
+        'ends_at' => $this->slot->endsAt,
+        'status' => BookingStatus::CONFIRMED->value,
+    ]);
+
+    $data = new BookingData(
+        consultationPlanId: $this->plan->id,
+        serviceCategory: ServiceCategory::FAMILY,
+        format: BookingFormat::ONLINE,
+        slot: $this->slot,
+        clientFullName: 'Other User',
+        clientEmail: 'other@example.com',
+        clientPhone: MoroccanPhoneNumber::fromInput('0612345678'),
+        description: 'Another booking for same slot',
+        locale: Locale::FR,
+    );
+
+    $this->service->createPending($data, $this->client);
+})->throws(SlotNotAvailable::class);
 
 test('confirm changes booking status to confirmed and dispatches event', function () {
     Event::fake();

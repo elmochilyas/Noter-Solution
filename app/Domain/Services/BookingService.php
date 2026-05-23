@@ -18,6 +18,7 @@ use App\ValueObjects\BookingData;
 use App\ValueObjects\BookingReference;
 use App\ValueObjects\MoroccanPhoneNumber;
 use App\ValueObjects\TimeSlot;
+use Illuminate\Support\Facades\DB;
 
 final class BookingService
 {
@@ -27,26 +28,30 @@ final class BookingService
 
     public function createPending(BookingData $data, ?Client $client = null): Booking
     {
-        $booking = new Booking;
-        $booking->reference = (string) BookingReference::generate();
-        $booking->client_id = $client?->id;
-        $booking->consultation_plan_id = $data->consultationPlanId;
-        $booking->service_category = $data->serviceCategory->value;
-        $booking->format = $data->format->value;
-        $booking->starts_at = $data->slot->startsAt;
-        $booking->ends_at = $data->slot->endsAt;
-        $booking->status = BookingStatus::PENDING_PAYMENT->value;
-        $booking->description = $data->description;
-        $booking->total_centimes = $data->totalCentimes;
-        $booking->currency = 'MAD';
-        $booking->save();
+        return DB::transaction(function () use ($data, $client) {
+            $this->availability->assertSlotIsFree($data->slot, $data->format);
 
-        $plan = ConsultationPlan::find($data->consultationPlanId);
-        if ($plan) {
-            $this->availability->clearSlotsCache($plan, $data->format);
-        }
+            $booking = new Booking;
+            $booking->reference = (string) BookingReference::generate();
+            $booking->client_id = $client?->id;
+            $booking->consultation_plan_id = $data->consultationPlanId;
+            $booking->service_category = $data->serviceCategory->value;
+            $booking->format = $data->format->value;
+            $booking->starts_at = $data->slot->startsAt;
+            $booking->ends_at = $data->slot->endsAt;
+            $booking->status = BookingStatus::PENDING_PAYMENT->value;
+            $booking->description = $data->description;
+            $booking->total_centimes = $data->totalCentimes;
+            $booking->currency = 'MAD';
+            $booking->save();
 
-        return $booking;
+            $plan = ConsultationPlan::find($data->consultationPlanId);
+            if ($plan) {
+                $this->availability->clearSlotsCache($plan, $data->format);
+            }
+
+            return $booking;
+        });
     }
 
     public function confirm(Booking $booking, ?Payment $payment = null): void
