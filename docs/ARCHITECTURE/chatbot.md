@@ -19,14 +19,21 @@ User message → Pre-processing → Intent classification → Branch
                   FAQ retrieval (RAG)           Triage form                  Escalation
                           │                             │                             │
                           ▼                             ▼                             ▼
-                  Claude API call             Recommendation card           Hand-off message
-                  with retrieved context     + booking button              + WhatsApp link
+                  Cerebras API call            Recommendation card           Hand-off message
+                  with retrieved context       + booking button              + WhatsApp link
+                  (non-streaming JSON)
                           │
                           ▼
-                  Streamed response → Browser via SSE
+                  Parse structured JSON response
+                  (answer, suggestions, recommended_plan)
                           │
                           ▼
-                  Persist (async): ChatbotMessage, conversation summary
+                  Render UI: answer text
+                  + optional plan card
+                  + dynamic suggestion chips
+                          │
+                          ▼
+                  Persist ChatbotMessage with tokens, latency, FAQ IDs
 ```
 
 ## Components
@@ -76,7 +83,7 @@ class IntentClassifier
 
 ### Tier 2 — LLM classification (if Tier 1 returns FAQ_QUERY)
 
-If a message contains a question word but no clear category, we let Claude classify it as part of the response generation prompt (single round-trip).
+If a message contains a question word but no clear category, we let the LLM classify it as part of the response generation prompt (single round-trip).
 
 ## RAG for FAQ answers
 
@@ -126,11 +133,11 @@ class FaqRetriever
 
 ### Provider
 
-- **Cerebras** via the OpenAI-compatible HTTP API (`https://api.cerebras.ai/v1`).
-- Model: `gpt-oss-120b` (120B params, ~3000 tok/s).
-- Streaming responses via Server-Sent Events (OpenAI SSE format).
+- **Cerebras** via the OpenAI-compatible HTTP API (`https://api.cerebras.ai/v1/chat/completions`).
+- Model: `gpt-oss-120b` (OpenAI GPT OSS, 120B params, ~3000 tok/s, 131K context window).
+- Non-streaming JSON responses (structured output). The application sends a single request and receives the complete JSON response.
 - Free tier: 1,000,000 tokens/day (no credit card required).
-- Cost: $0 for free tier; $0.50/1M tokens if upgraded.
+- Cost: $0.35/1M input tokens; $0.75/1M output tokens (itemized). For cost tracking see "Cost monitoring" below.
 
 ### System prompt
 
@@ -141,12 +148,15 @@ Key elements:
 - Scope: "Only answer questions about notarial services in Morocco."
 - Tone: formal, calm, professional.
 - Languages: respond in the same language as the user.
+- Format: return a JSON object matching the structured response schema (see above). The `answer` field may contain light Markdown (**bold**, line breaks, bullet lists).
 - Guardrails:
   - Never give legal advice — only general information.
-  - Never quote fees not present in the retrieved context.
+  - Never quote fees in the `answer` text. Plan prices are inserted by the application from the database.
+  - Never include a `recommended_plan` unless the user has expressed concrete booking intent.
   - Recommend booking a consultation for specific cases.
   - Recommend WhatsApp / phone for urgent matters.
-- Format: short answers (2-4 sentences), no markdown unless emphasizing.
+- Populate `suggestions` dynamically based on the conversation flow — not from a fixed list.
+- Forbid superlative / comparative claims in any field.
 - Disclaimer line appended to every substantive answer.
 
 ### Message structure sent to Cerebras
@@ -156,10 +166,11 @@ Key elements:
   "model": "gpt-oss-120b",
   "max_completion_tokens": 600,
   "temperature": 0.3,
+  "response_format": { "type": "json_object" },
   "messages": [
     { "role": "system", "content": "<system prompt for resolved locale>" },
     { "role": "user", "content": "Quels documents pour un divorce ?" },
-    { "role": "assistant", "content": "<previous response>" },
+    { "role": "assistant", "content": "<structured response JSON from previous turn>" },
     {
       "role": "user",
       "content": "Combien de temps ça prend ?\n\n<context from retrieved FAQ entries — clearly labeled>"
@@ -178,11 +189,40 @@ The retrieved FAQ context is appended to the user message as a context block, no
 - Response: max 600 tokens.
 - Per call ceiling: ~3000 tokens.
 
-### Streaming
+### Structured response schema
 
-- We use the streaming API (`stream: true`) and forward chunks via SSE.
-- Browser shows progressive output — perceived speed.
-- On disconnection, we cancel the upstream stream.
+The LLM is instructed to return a JSON object matching this contract:
+
+```json
+{
+  "answer": "string — main text, max ~120 words, user's locale. Light Markdown: **bold**, line breaks, bullet lists (- ...). No headings, no hyperlinks.",
+  "suggestions": [
+    "string — short follow-up question chip, max 6 words, user's locale. 2–4 items, contextually relevant, no duplicates."
+  ],
+  "recommended_plan": {
+    "slug": "free-orientation | standard-online | in-office | extended",
+    "category": "family | real_estate | financial | contracts",
+    "format": "online | in_office",
+    "reason": "one sentence explaining why this plan fits, user's locale"
+  } | null,
+  "escalate": false | true,
+  "out_of_scope": false | true
+}
+```
+
+Rules:
+- `answer` is the only required field. Others are optional.
+- `recommended_plan` must be `null` unless the user has expressed concrete booking intent or is asking about pricing/process for a specific matter.
+- `escalate: true` only when the user explicitly asks for a human or the bot's confidence is very low.
+- `out_of_scope: true` when the question is outside notarial services in Morocco.
+- Never include a price/amount in `answer` or `reason` — prices come from the plan card.
+- Suggestions must be questions the user might ask next, given the current answer.
+
+### Response handling
+- The UI shows a typing indicator (three brass dots with staggered `animate-pulse` delays) during the round-trip (typically ~600ms–2s on Cerebras).
+- The response is parsed from JSON into a `ChatbotResponse` value object.
+- If JSON parsing fails, a fallback `ChatbotResponse` with a generic apology and escalation chips is returned. A Sentry warning is fired.
+- On browser disconnect or timeout, the upstream request is cancelled and the user sees an error message.
 
 ### Rate limiting
 
@@ -237,7 +277,7 @@ Escalation message includes:
 - A "Send my conversation summary?" button (optional, with consent).
 
 If the user opts to send the summary:
-- A short summary (Claude-generated) is added to the contact form.
+- A short summary (LLM-generated) is added to the contact form.
 - Sent to the admin as a `ContactMessageReceived` event.
 
 ## Out-of-scope responses
@@ -269,7 +309,8 @@ Implemented at multiple layers:
 | Cerebras API rate limited | Same fallback |
 | Cerebras quota exhausted | Same fallback |
 | Output filter triggered | Filtered response shown + escalation suggestion |
-| Browser closes mid-stream | Server cancels upstream call to save tokens |
+| Browser disconnects | Server cancels upstream request |
+| JSON parse failure | Fallback response + Sentry warning |
 
 All failures logged to Sentry with the conversation ID for review.
 
@@ -304,4 +345,4 @@ On save:
 - The chatbot disclaimer banner notes that conversations are logged for service improvement.
 - Conversation retention: 18 months (see `database-schema.md` data retention).
 - Right to erasure: a Client requesting deletion has their conversations anonymized (session_id and client_id cleared).
-- No PII intentionally sent to Claude — the system prompt warns the user not to share personal info, and we don't pass user identity to the LLM.
+- No PII intentionally sent to the LLM — the system prompt warns the user not to share personal info, and we don't pass user identity to the LLM.

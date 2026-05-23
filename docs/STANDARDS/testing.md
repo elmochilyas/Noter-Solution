@@ -107,7 +107,7 @@ expect()->extend('toBeMoneyMad', function (int $centimes) {
 ## Mocking external services
 
 - **Stripe:** use `Stripe\Stripe::setApiBase()` to point at a local mock, or mock the gateway interface.
-- **Claude API:** mock the `ChatbotClient` interface; never call the real API in tests.
+- **Cerebras API:** mock the `LlmClient` interface; never call the real API in tests.
 - **Twilio:** mock the `SmsGateway` / `WhatsappGateway` interfaces.
 - **Email:** `Mail::fake()` then assert with `Mail::assertSent()`.
 - **Notifications:** `Notification::fake()` then assert dispatched.

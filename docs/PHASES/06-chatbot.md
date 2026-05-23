@@ -76,18 +76,19 @@ Acceptance:
 
 **Implementation:** `app/Domain/Services/Chatbot/IntentClassifier.php` — keyword matching for 6 intents across ar/fr, OUT_OF_SCOPE triggers on litigation/criminal/lawyer terms, Tier-2 calls `LlmClient::generate()` with a classification prompt for ambiguous messages (10-120 chars, no question mark).
 
-### Task 4: CerebrasClient (replaces ClaudeClient)
+### Task 4: CerebrasClient
 
 Acceptance:
 - [x] HTTP client to `https://api.cerebras.ai/v1/chat/completions` (OpenAI-compatible)
-- [x] Streaming support via `stream: true` with SSE parser
+- [x] Structured output via `response_format: { "type": "json_object" }`
+- [ ] Non-streaming responses (stream: false) — single JSON response per call
 - [x] Per-call token budget enforced (4K ceiling: system + context + history + max_tokens)
-- [x] Token usage + latency captured per call
-- [x] Timeout (15s/20s) with friendly fallback on exceed
+- [ ] Actual token usage + latency captured per call and returned in LlmResponse
+- [x] Timeout (15s) with friendly fallback on exceed
 - [x] Retries: 1 retry on 5xx, no retry on 4xx
-- [x] Cancellation propagation when the browser disconnects (checks `connection_aborted()` between chunks)
+- [x] Cancellation when the browser disconnects
 
-**Implementation:** `app/Infrastructure/Chatbot/CerebrasClient.php` — implements `LlmClient` contract, OpenAI-compatible payload format, `connection_aborted()` check in streaming loop, `enforceTokenBudget()` method, `MAX_RETRIES = 1`.
+**Implementation:** `app/Infrastructure/Chatbot/CerebrasClient.php` — implements `LlmClient` contract, OpenAI-compatible payload format, `enforceTokenBudget()` method, `MAX_RETRIES = 1`.
 
 ### Task 5: ChatbotService + system prompt
 
@@ -290,7 +291,7 @@ Acceptance:
 - **System-prompt brittleness.** Mitigation: store prompt in lang files (editable), keep it short and focused, allow Sana to iterate post-launch via Filament without code deploy.
 - **Hallucinated legal advice slipping through filter.** Mitigation: strict prompt + output filter with 2-tier escalation (regenerate → escalate) + conversation review by Sana with the "promote to FAQ" loop closing gaps.
 - **Cost runaway.** Mitigation: rate limits + budget cap (configurable) + Sentry alerts at 80%.
-- **Latency complaints.** Mitigation: typing indicator for perceived speed; Cerebras `gpt-oss-120b` is ~3000 tok/s which is faster than Claude.
+- **Latency complaints.** Mitigation: typing indicator for perceived speed; Cerebras `gpt-oss-120b` is ~3000 tok/s.
 - **Multilingual quality of retrieval.** Mitigation: current LIKE-based FAQ retrieval works on both SQLite and PostgreSQL; upgrade to pgvector with multilingual embedding model when deploying to PostgreSQL.
 
 ## Demo to Sana

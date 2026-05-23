@@ -80,7 +80,7 @@ Application →  Services, Jobs, Listeners, Form Requests
     ↓
 Domain      →  Models, Enums, Value Objects, Policies
     ↓
-Infrastructure → External clients (Stripe, Claude, Twilio, Supabase)
+Infrastructure → External clients (Stripe, Cerebras, Twilio, Supabase)
 ```
 
 **Rules:**

@@ -456,7 +456,7 @@ The domain depends on:
 
 The domain does **NOT** depend on:
 - HTTP request/response classes
-- Stripe SDK, Claude SDK, Twilio SDK (interfaces live in domain, implementations in infrastructure)
+- Stripe SDK, Cerebras SDK, Twilio SDK (interfaces live in domain, implementations in infrastructure)
 - Filament
 - Livewire
 

@@ -14,7 +14,7 @@ Cross all the t's and dot all the i's. Site is ready for soft launch in producti
 - [ ] Stripe production keys received (account fully activated for Morocco)
 - [ ] Twilio production sender ID + WhatsApp templates approved
 - [ ] Resend production domain warmed
-- [ ] Anthropic production tier provisioned
+- [x] Cerebras free tier provisioned (no credit card needed — 1M tokens/day)
 - [ ] Backup destination configured (Backblaze B2 or Wasabi bucket for offsite dumps)
 
 ## Scope
@@ -133,7 +133,7 @@ Acceptance (per `COMPLIANCE/loi-09-08.md` checklist):
 - [ ] Conversations anonymized on client deletion
 - [ ] Receipts retained 10 years (no purge job touches receipts)
 - [ ] CNDP declarations drafted and filed (Sana / counsel files; engineering provides the system descriptions)
-- [ ] DPAs collected from Supabase, Stripe, Twilio, Resend, Anthropic
+- [ ] DPAs collected from Supabase, Stripe, Twilio, Resend, Cerebras
 - [ ] Quarterly review reminder set in Sana's calendar
 
 Acceptance (per `COMPLIANCE/notary-rules.md` checklist):
@@ -167,7 +167,7 @@ Acceptance:
 - [ ] PHP 8.3, Nginx, Redis, PHP-FPM, Horizon Supervisor configured
 - [ ] Production Supabase project promoted / created (EU-Central-1, Pro tier, pgvector enabled, PITR on)
 - [ ] Supabase buckets created with correct privacy
-- [ ] Production environment variables set in Forge (Stripe live, Twilio prod, Resend prod, Anthropic prod, Voyage prod, Sentry prod DSN)
+- [ ] Production environment variables set in Forge (Stripe live, Twilio prod, Resend prod, Cerebras prod, Voyage prod, Sentry prod DSN)
 - [ ] APP_KEY generated fresh for prod
 - [ ] Cron entry for Laravel scheduler installed
 - [ ] TLS via Let's Encrypt, HSTS enabled
@@ -220,7 +220,7 @@ Acceptance:
 - [ ] Every doc in this set re-read against the built reality
 - [ ] Any drift fixed in a final docs-only PR
 - [ ] `README.md` updated with prod URLs and post-launch quick links
-- [ ] `OPERATIONS/runbooks/` populated with: rotate-app-key, rotate-stripe-webhook-secret, rotate-anthropic-key, prod-deploy, hotfix
+- [ ] `OPERATIONS/runbooks/` populated with: rotate-app-key, rotate-stripe-webhook-secret, rotate-cerebras-api-key, prod-deploy, hotfix
 - [ ] Lessons-learned log started at `OPERATIONS/lessons-learned.md`
 
 ### Task 14: Launch communication

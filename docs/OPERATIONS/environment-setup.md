@@ -83,9 +83,9 @@ TWILIO_AUTH_TOKEN=xxx
 TWILIO_FROM_SMS=Bouhamidi
 TWILIO_FROM_WHATSAPP=whatsapp:+14155238886    # Twilio sandbox in dev
 
-# Anthropic
-ANTHROPIC_API_KEY=sk-ant-xxx
-ANTHROPIC_MODEL=claude-sonnet-4-5
+# Cerebras (LLM provider)
+CEREBRAS_API_KEY=
+CEREBRAS_MODEL=gpt-oss-120b
 
 # Voyage AI (embeddings)
 VOYAGE_API_KEY=pa-xxx

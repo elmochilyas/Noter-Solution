@@ -1,19 +1,19 @@
-# Rotate Anthropic API Key
+# Rotate Cerebras API Key
 
 ## When to rotate
-- Annually (or per Anthropic's recommendation)
+- Annually (or per Cerebras's recommendation)
 - After any suspected key exposure
 
 ## Procedure
 
 ```bash
 # 1. Generate new key
-#   - Anthropic Console → API Keys → Create Key
-#   - Copy the `sk-ant-...` value
+#   - Cerebras Console → API Keys → Create Key
+#   - Copy the key value
 #   - Keep the old key temporarily (both active if allowed)
 
 # 2. Update staging
-#   - Forge → Environment → ANTHROPIC_API_KEY → paste → Save
+#   - Forge → Environment → CEREBRAS_API_KEY → paste → Save
 #   - Deploy
 
 # 3. Verify staging
@@ -25,7 +25,7 @@
 #   - Deploy
 
 # 5. Revoke old key
-#   - Anthropic Console → API Keys → Delete old key
+#   - Cerebras Console → API Keys → Delete old key
 #   - Confirm no errors in Sentry/Pulse for 1 hour
 
 # 6. Verify production

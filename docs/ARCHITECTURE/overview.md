@@ -19,9 +19,9 @@
         └──┬──────────┬──────────┬──────────┬──────────┬──────────────┘
            │          │          │          │          │
            ▼          ▼          ▼          ▼          ▼
-       Supabase   Supabase    Stripe    Twilio     Anthropic
-       Postgres   Storage     (cards)   (SMS+WA)    (Claude)
-       + pgvector (docs)
+        Supabase   Supabase    Stripe    Twilio     Cerebras
+        Postgres   Storage     (cards)   (SMS+WA)    (LLM)
+        + pgvector (docs)
 
            │          │
            ▼          ▼
@@ -46,12 +46,12 @@
 │   Repository interfaces                                          │
 ├─────────────────────────────────────────────────────────────────┤
 │ Infrastructure Layer                                             │
-│   Stripe client · Claude client · Twilio client · S3 driver       │
+│   Stripe client · Cerebras client · Twilio client · S3 driver       │
 │   Repository implementations · External adapters                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-Calls go down only. The domain never knows about Stripe, Claude, or HTTP.
+Calls go down only. The domain never knows about Stripe, Cerebras, or HTTP.
 
 ## Request lifecycle (typical booking submission)
 
@@ -105,7 +105,7 @@ External managed services:
   - Supabase (Postgres + Storage)  — EU Central, Frankfurt
   - Stripe                         — Ireland data center
   - Twilio                         — Ireland data center
-  - Anthropic API                  — US (only path with non-EU dependency)
+   - Cerebras API                  — US (only path with non-EU dependency)
   - Resend                         — US
 ```
 
@@ -147,12 +147,12 @@ Browser ─→ /chatbot/message
               │
        ┌──────┴──────┐
        ▼             ▼
-   pgvector       Claude API
-   (retrieve)     (generate)
+    pgvector       Cerebras API
+    (retrieve)     (generate)
        │             │
        └──────┬──────┘
               ▼
-       Stream response back to browser via SSE
+        Parse structured JSON response → render UI
               │
               ▼
        Async: persist ChatbotMessage
@@ -203,7 +203,7 @@ Browser ─→ /chatbot/message
 |---|---|
 | Vendor lock to Supabase | Pure SQL + S3-compatible — exit cost is low |
 | Vendor lock to Stripe | Abstracted gateway, swap planned (CMI) |
-| US-based Anthropic API | Acceptable — chatbot is informational, no PII sent (only the message + retrieved FAQ excerpts) |
+| US-based Cerebras API | Acceptable — chatbot is informational, no PII sent (only the message + retrieved FAQ excerpts) |
 | Single region (Frankfurt) | Audience is Morocco; latency is fine; no multi-region need |
 | No multi-tenant | One practice. Can be refactored later if needed (low likelihood) |
 

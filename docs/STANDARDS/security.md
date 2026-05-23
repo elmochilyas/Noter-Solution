@@ -161,7 +161,7 @@ Implemented via Laravel rate-limit middleware with named limiters in `App\Provid
 - All secrets in `.env`. **No secrets in code, no secrets in git history.**
 - `.env` is in `.gitignore`. `.env.example` is committed with placeholder values.
 - Production secrets stored in Forge env, not on the developer machines.
-- Anthropic / Stripe / Twilio / Supabase keys rotated every 6 months minimum.
+- Cerebras / Stripe / Twilio / Supabase keys rotated every 6 months minimum.
 - Pre-commit hook scans for accidentally committed secrets via `gitleaks`.
 - Pre-deploy CI step blocks deploys if `.env` files appear in the diff.
 

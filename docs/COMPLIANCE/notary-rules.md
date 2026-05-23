@@ -58,7 +58,7 @@ A *adoul* is bound by professional secrecy regarding everything they learn in th
 ### What this means for the system
 
 - **No client matter details should be discoverable by any third party.** Including hosting providers, marketing tools, analytics, or AI systems.
-- **No data should leave Morocco / EU unless strictly necessary.** Where it must (Anthropic API), client identity must be stripped.
+- **No data should leave Morocco / EU unless strictly necessary.** Where it must (Cerebras API), client identity must be stripped.
 - **The chatbot must not "remember" specific client matters across sessions in a way that could be exposed.**
 - **Internal access controls must be strict.** Only Sana and authorized assistants see client data. Logging access (audit log) provides accountability.
 

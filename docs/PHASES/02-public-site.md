@@ -196,7 +196,7 @@ Acceptance:
 Acceptance:
 - [x] Floating button visible on every public page
 - [x] On click: opens a panel with "Bientôt disponible" message + phone/WhatsApp
-- [x] No actual Claude integration (that's phase 6)
+- [x] No actual chatbot LLM integration (that's phase 6)
 
 ### Task 16: Plausible Analytics
 

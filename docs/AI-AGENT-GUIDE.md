@@ -77,9 +77,9 @@ A task is done when **all** of the following are true:
 - ❌ Inline styles in Blade — use Tailwind classes only.
 - ❌ Disabling Larastan (`@phpstan-ignore-line`) without a comment explaining why.
 - ❌ Importing the `Auth` facade in Filament resources — use Filament's helpers.
-- ❌ Calling the Claude API or any external service synchronously inside a HTTP request when it could be queued.
+- ❌ Calling any LLM API or external service synchronously inside a HTTP request when it could be queued.
 - ❌ Using `request()->all()` or unprotected mass assignment.
-- ❌ Writing tests that touch the real Stripe / Claude / Twilio APIs.
+- ❌ Writing tests that touch the real Stripe / Cerebras / Twilio APIs.
 - ❌ Copying Stitch HTML/CSS verbatim into the codebase — translate to Blade + Tailwind utilities mapped to design tokens.
 - ❌ Using LTR-only Tailwind utilities (`ml-`, `mr-`, `pl-`, `pr-`, `text-left`, `text-right`, `left-`, `right-`) — use logical variants (`ms-`, `me-`, `ps-`, `pe-`, `text-start`, `text-end`, `start-`, `end-`).
 - ❌ Inventing colors, fonts, or spacing values not in `DESIGN/design-system.md`.

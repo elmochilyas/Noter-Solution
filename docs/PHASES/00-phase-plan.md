@@ -108,7 +108,7 @@ Sana's involvement needed at specific points. Front-loaded to avoid blocking:
 | Resend domain verified (SPF/DKIM/DMARC) | Booking + payment | 1 day |
 | Twilio account + SMS sender ID approval | Booking + payment | 1–2 weeks |
 | Twilio WhatsApp template approvals | Booking + payment / Notifications | 1–3 weeks |
-| Anthropic API key (production tier) | Chatbot | 1 day |
+| Cerebras API key (free tier — no credit card) | Chatbot | 1 day |
 | Voyage AI key | Chatbot | 1 day |
 | CNDP declaration submitted | Polish (pre-launch) | 2–4 weeks |
 | CMI merchant account | Post-launch (v1.1) | 4–8 weeks |

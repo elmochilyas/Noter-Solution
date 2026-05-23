@@ -151,7 +151,7 @@ Maintenance mode (`php artisan down`) is only used when a destructive migration 
 - No developer machine has production secrets.
 - Rotation schedule:
   - Stripe webhook secret: yearly
-  - Anthropic / Voyage / Twilio API keys: 6-monthly
+  - Cerebras / Voyage / Twilio API keys: 6-monthly
   - Resend API key: 6-monthly
   - Supabase service-role key: 6-monthly
   - `APP_KEY`: yearly with key-rotation playbook
@@ -317,7 +317,7 @@ See `OPERATIONS/backup-recovery.md` for the full procedure. Headline:
 | Sentry Team | 26 |
 | Plausible Analytics | 9 |
 | Domain | ~1 |
-| Anthropic API (estimated) | ~20 |
+| Cerebras API (free tier — no cost) | $0 |
 | Voyage AI | ~3 |
 | **Total** | **~150** |
 
@@ -329,7 +329,7 @@ Reviewed monthly.
 - Sentry region: EU.
 - Resend: EU region available.
 - Twilio: data center in Ireland.
-- Anthropic: US — but no client PII sent (see `ARCHITECTURE/chatbot.md`).
+- Cerebras: US — but no client PII sent (see `ARCHITECTURE/chatbot.md`).
 - Stripe: EU (Ireland).
 
 Data flows audited annually; see `COMPLIANCE/loi-09-08.md`.
