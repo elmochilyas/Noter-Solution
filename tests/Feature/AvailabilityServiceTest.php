@@ -114,6 +114,26 @@ test('assertSlotIsFree throws for held slot', function () {
     $this->service->assertSlotIsFree($slot, BookingFormat::ONLINE);
 })->throws(SlotNotAvailable::class);
 
+test('availableSlots accepts correct argument order (from, to, plan, format)', function () {
+    $targetDate = CarbonImmutable::now()->addDays(7);
+
+    AvailabilityRule::factory()->create([
+        'day_of_week' => $targetDate->dayOfWeekIso,
+        'starts_at' => '09:00',
+        'ends_at' => '18:00',
+        'format' => 'both',
+        'is_active' => true,
+    ]);
+
+    $from = $targetDate->startOfDay();
+    $to = $targetDate->endOfDay();
+
+    $slots = $this->service->availableSlots($from, $to, $this->plan, BookingFormat::ONLINE);
+
+    expect($slots)->toBeArray();
+    expect($slots[0])->toBeInstanceOf(TimeSlot::class);
+});
+
 test('holdSlot creates a hold with 15 minute expiry', function () {
     $slot = new TimeSlot(
         CarbonImmutable::parse('+7 days 10:00'),

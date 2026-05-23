@@ -2,14 +2,21 @@
 
 namespace App\Domain\Services\Chatbot;
 
+use App\Domain\Chatbot\ChatbotResponse;
+use App\Domain\Chatbot\LlmRequest;
+use App\Domain\Chatbot\LlmResponse;
+use App\Domain\Chatbot\PlanRecommendation;
 use App\Domain\Services\Chatbot\Contracts\LlmClient;
 use App\Enums\ChatbotIntent;
 use App\Models\ChatbotConversation;
 use App\Models\ChatbotMessage;
+use App\Models\ConsultationPlan;
 use App\Models\ContactMessage;
 use App\Models\Faq;
-use Generator;
+use App\Services\Chatbot\ChatbotResponseParser;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Sentry;
 
 final class ChatbotService
 {
@@ -21,14 +28,13 @@ final class ChatbotService
 
     private const MAX_INPUT_LENGTH = 500;
 
-    private const CEREBRAS_COST_PER_TOKEN = 0.0000005;
-
     public function __construct(
         private readonly LlmClient $llm,
         private readonly IntentClassifier $classifier,
         private readonly TriageFlow $triage,
         private readonly EscalationHandler $escalation,
         private readonly OutputFilter $filter,
+        private readonly ChatbotResponseParser $parser,
     ) {}
 
     public function startConversation(string $sessionId, string $locale): ChatbotConversation
@@ -60,7 +66,7 @@ final class ChatbotService
         ]);
     }
 
-    public function respondTo(ChatbotConversation $conversation, string $userMessage): Generator
+    public function respondTo(ChatbotConversation $conversation, string $userMessage): ChatbotResponse
     {
         $timeoutMinutes = (int) config('chatbot.idle_timeout_minutes', 15);
 
@@ -68,18 +74,17 @@ final class ChatbotService
             $conversation->ended_at = now();
             $conversation->save();
 
-            $locale = $conversation->locale;
-            yield __('chatbot.session_expired', [], $locale);
-
-            return;
+            return new ChatbotResponse(
+                answer: __('chatbot.session_expired', [], $conversation->locale),
+            );
         }
 
         $userMessage = mb_substr(trim($userMessage), 0, self::MAX_INPUT_LENGTH);
 
         if ($userMessage === '') {
-            yield __('chatbot.empty_message');
-
-            return;
+            return new ChatbotResponse(
+                answer: __('chatbot.empty_message', [], $conversation->locale),
+            );
         }
 
         $locale = $conversation->locale;
@@ -89,38 +94,48 @@ final class ChatbotService
         $intent = $this->classifier->classify($userMessage, $locale);
 
         if ($intent === ChatbotIntent::OUT_OF_SCOPE) {
-            $response = __('chatbot.out_of_scope');
-            $this->recordMessage($conversation, 'assistant', $response);
+            $response = new ChatbotResponse(
+                answer: __('chatbot.out_of_scope', [], $locale),
+                outOfScope: true,
+            );
+            $this->recordMessage($conversation, 'assistant', $response->answer);
             $conversation->intent_resolved = 'out_of_scope';
             $conversation->last_message_at = now();
             $conversation->save();
-            yield $response;
 
-            return;
+            return $response;
         }
 
         if ($intent === ChatbotIntent::ESCALATION) {
-            $response = $this->handleEscalation($conversation);
-            yield $response;
+            $result = $this->escalateToHuman($conversation);
 
-            return;
+            return new ChatbotResponse(
+                answer: $result['response'],
+                escalate: true,
+            );
         }
 
         if ($intent === ChatbotIntent::GREETING) {
-            $response = __('chatbot.greeting_response');
-            $this->recordMessage($conversation, 'assistant', $response);
-            yield $response;
+            $response = new ChatbotResponse(
+                answer: __('chatbot.greeting_response', [], $locale),
+                suggestions: config('chatbot.greeting_chips.'.$locale, []),
+            );
+            $this->recordMessage($conversation, 'assistant', $response->answer);
+            $conversation->last_message_at = now();
+            $conversation->save();
 
-            return;
+            return $response;
         }
 
         $history = $this->getConversationHistory($conversation);
 
         if ($this->escalation->detectLoop($history)) {
-            $response = $this->handleEscalation($conversation);
-            yield $response;
+            $result = $this->escalateToHuman($conversation);
 
-            return;
+            return new ChatbotResponse(
+                answer: $result['response'],
+                escalate: true,
+            );
         }
 
         $faqs = $this->retrieveFaqs($userMessage, $locale);
@@ -128,7 +143,6 @@ final class ChatbotService
 
         $metadata = $conversation->metadata ?? [];
 
-        // Handle active triage flow
         if (($metadata['triage_state'] ?? 'idle') === 'active') {
             $step = $metadata['triage_step'] ?? 'category';
             $next = $this->triage->processStep($step, $userMessage, $metadata);
@@ -139,15 +153,16 @@ final class ChatbotService
                 $conversation->intent_resolved = 'booked';
                 $conversation->save();
 
-                yield $this->buildRecommendation($metadata, $locale);
-
-                return;
+                return $this->buildRecommendationResponse($metadata, $locale);
             }
 
             $conversation->save();
-            yield $next;
+            $this->recordMessage($conversation, 'assistant', $next);
 
-            return;
+            return new ChatbotResponse(
+                answer: $next,
+                suggestions: $this->triageSuggestions($metadata['triage_step'], $locale),
+            );
         }
 
         if ($intent === ChatbotIntent::BOOKING_INTENT) {
@@ -156,61 +171,20 @@ final class ChatbotService
             $conversation->save();
 
             $this->recordMessage($conversation, 'assistant', $response);
-            yield $response;
 
-            return;
+            return new ChatbotResponse(
+                answer: $response,
+                suggestions: $this->triageSuggestions('category', $locale),
+            );
         }
 
-        // Main LLM generation with output filtering
-        $systemPrompt = __(self::SYSTEM_PROMPT_KEY, [], $locale);
-        $llmMessages = $this->buildLlmMessages($history, $userMessage, $faqContext);
-
-        $rawResponse = $this->llm->generate($systemPrompt, $llmMessages);
-
-        // 2+ violations → escalate immediately
-        if ($this->filter->filter($rawResponse) === 'ESCALATE') {
-            $cleaned = $this->filter->clean($rawResponse);
-            yield $cleaned."\n\n".__('chatbot.escalation_suggestion');
-
-            return;
-        }
-
-        // 1 violation → regenerate once with stricter prompt
-        if ($this->filter->hasViolations($rawResponse)) {
-            $stricterSystemPrompt = __(self::STRICTER_SYSTEM_PROMPT_KEY, [], $locale);
-            $regenerated = $this->llm->generate($stricterSystemPrompt, $llmMessages, 400, 0.2);
-
-            if ($this->filter->filter($regenerated) === 'ESCALATE') {
-                $cleaned = $this->filter->clean($regenerated);
-                yield $cleaned."\n\n".__('chatbot.escalation_suggestion');
-
-                return;
-            }
-
-            if ($this->filter->hasViolations($regenerated)) {
-                $cleaned = $this->filter->clean($regenerated);
-                yield $cleaned."\n\n".__('chatbot.escalation_suggestion');
-
-                return;
-            }
-
-            $this->recordMessage($conversation, 'assistant', $regenerated, $faqs->pluck('id')->toArray());
-            $conversation->last_message_at = now();
-            $conversation->save();
-            yield $regenerated;
-
-            return;
-        }
-
-        $this->recordMessage($conversation, 'assistant', $rawResponse, $faqs->pluck('id')->toArray());
-        $conversation->last_message_at = now();
-        $conversation->save();
-        yield $rawResponse;
+        // Main LLM generation with structured response
+        return $this->generateStructuredResponse($conversation, $history, $userMessage, $faqContext, $faqs, $locale);
     }
 
     public function escalateToHuman(ChatbotConversation $conversation, ?string $summary = null): array
     {
-        $escalation = $this->escalation->buildResponse($conversation, $summary);
+        $escalation = $this->escalation->buildResponse($conversation);
 
         if ($summary) {
             ContactMessage::create([
@@ -235,7 +209,7 @@ final class ChatbotService
             'phone' => $phone,
             'whatsapp_link' => $whatsapp,
             'booking_link' => $escalation['booking_link'],
-        ]);
+        ], $conversation->locale);
 
         $this->recordMessage($conversation, 'assistant', $response);
 
@@ -249,34 +223,163 @@ final class ChatbotService
     {
         $monthStart = now()->startOfMonth();
 
-        $totalTokens = ChatbotMessage::where('created_at', '>=', $monthStart)
-            ->get()
-            ->sum(fn (ChatbotMessage $msg) => ($msg->tokens_in ?? 0) + ($msg->tokens_out ?? 0));
+        $totalInput = ChatbotMessage::where('created_at', '>=', $monthStart)
+            ->where('role', 'user')
+            ->sum('tokens_in');
 
-        return round($totalTokens * self::CEREBRAS_COST_PER_TOKEN, 4);
+        $totalOutput = ChatbotMessage::where('created_at', '>=', $monthStart)
+            ->where('role', 'assistant')
+            ->sum('tokens_out');
+
+        $inputCost = ($totalInput / 1_000_000) * config('chatbot.pricing.input_per_million', 0.35);
+        $outputCost = ($totalOutput / 1_000_000) * config('chatbot.pricing.output_per_million', 0.75);
+
+        return round($inputCost + $outputCost, 4);
     }
 
     public function isBudgetExhausted(): bool
     {
-        $budget = (float) config('services.cerebras.monthly_budget', 5.0);
-        $spent = $this->getMonthlyCost();
+        $budget = (float) config('chatbot.pricing.monthly_budget', 5.0);
 
-        return $spent >= $budget;
+        return $this->getMonthlyCost() >= $budget;
     }
 
     public function isBudgetWarning(): bool
     {
-        $budget = (float) config('services.cerebras.monthly_budget', 5.0);
-        $spent = $this->getMonthlyCost();
+        $budget = (float) config('chatbot.pricing.monthly_budget', 5.0);
 
-        return $budget > 0 && ($spent / $budget) >= 0.8;
+        return $budget > 0 && ($this->getMonthlyCost() / $budget) >= 0.8;
     }
 
-    private function handleEscalation(ChatbotConversation $conversation): string
-    {
-        $result = $this->escalateToHuman($conversation);
+    private function generateStructuredResponse(
+        ChatbotConversation $conversation,
+        array $history,
+        string $userMessage,
+        string $faqContext,
+        iterable $faqs,
+        string $locale,
+    ): ChatbotResponse {
+        $systemPrompt = __(self::SYSTEM_PROMPT_KEY, [], $locale);
+        $llmMessages = $this->buildLlmMessages($history, $userMessage, $faqContext);
 
-        return $result['response'];
+        try {
+            $request = new LlmRequest(
+                system: $systemPrompt,
+                messages: $llmMessages,
+                responseFormat: 'json_object',
+            );
+
+            $llmResponse = $this->llm->complete($request);
+
+            $parsed = $this->parser->parse($llmResponse->content, $locale);
+
+            $cleaned = $this->filter->clean($parsed->answer);
+            $violations = $this->filter->violationCount($parsed->answer);
+
+            if ($violations >= 2) {
+                Log::warning('Chatbot output filter: 2+ violations, escalate', [
+                    'conversation_id' => $conversation->id,
+                ]);
+
+                $parsed = new ChatbotResponse(
+                    answer: $cleaned."\n\n".__('chatbot.escalation_suggestion', [], $locale),
+                    escalate: true,
+                );
+
+                $this->recordMessage($conversation, 'assistant', $parsed->answer, $faqs->pluck('id')->toArray(), $llmResponse);
+
+                return $parsed;
+            }
+
+            if ($violations >= 1) {
+                Log::info('Chatbot output filter: 1 violation, regenerating', [
+                    'conversation_id' => $conversation->id,
+                ]);
+
+                $stricterPrompt = __(self::STRICTER_SYSTEM_PROMPT_KEY, [], $locale);
+                $stricterRequest = new LlmRequest(
+                    system: $stricterPrompt,
+                    messages: $llmMessages,
+                    maxTokens: 400,
+                    temperature: 0.2,
+                    responseFormat: 'json_object',
+                );
+
+                $regenerated = $this->llm->complete($stricterRequest);
+                $reParsed = $this->parser->parse($regenerated->content, $locale);
+                $reViolations = $this->filter->violationCount($reParsed->answer);
+
+                if ($reViolations > 0) {
+                    $cleaned = $this->filter->clean($reParsed->answer);
+
+                    $parsed = new ChatbotResponse(
+                        answer: $cleaned."\n\n".__('chatbot.escalation_suggestion', [], $locale),
+                        escalate: true,
+                    );
+
+                    $this->recordMessage($conversation, 'assistant', $parsed->answer, $faqs->pluck('id')->toArray(), $regenerated);
+
+                    return $parsed;
+                }
+
+                $parsed = $reParsed;
+                $llmResponse = $regenerated;
+            }
+
+            if ($parsed->outOfScope) {
+                $conversation->intent_resolved = 'out_of_scope';
+            }
+
+            $planCard = null;
+            if ($parsed->recommendedPlan !== null) {
+                $plan = ConsultationPlan::where('slug', $parsed->recommendedPlan->slug)->first();
+
+                if ($plan) {
+                    $planCard = [
+                        'id' => $plan->id,
+                        'slug' => $plan->slug,
+                        'name' => $plan->name_translations[$locale] ?? $plan->slug,
+                        'price_centimes' => $plan->price_centimes,
+                        'duration_minutes' => $plan->duration_minutes,
+                        'format' => $plan->format,
+                        'reason' => $parsed->recommendedPlan->reason,
+                        'booking_url' => $parsed->recommendedPlan->toBookingUrl($locale),
+                    ];
+
+                    $conversation->intent_resolved = 'booked';
+                }
+            }
+
+            $this->recordMessage(
+                $conversation,
+                'assistant',
+                $parsed->answer,
+                $faqs->pluck('id')->toArray(),
+                $llmResponse,
+            );
+
+            $conversation->last_message_at = now();
+            $conversation->save();
+        } catch (\Throwable $e) {
+            Log::error('Chatbot generation failed', [
+                'conversation_id' => $conversation->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            if (class_exists('\Sentry')) {
+                Sentry\captureException($e);
+            }
+
+            return ChatbotResponse::fallback($locale);
+        }
+
+        return new ChatbotResponse(
+            answer: $parsed->answer,
+            suggestions: $parsed->suggestions,
+            recommendedPlan: $parsed->recommendedPlan,
+            escalate: $parsed->escalate,
+            outOfScope: $parsed->outOfScope,
+        );
     }
 
     private function retrieveFaqs(string $query, string $locale): iterable
@@ -355,45 +458,78 @@ final class ChatbotService
         string $role,
         string $content,
         array $retrievedFaqIds = [],
+        ?LlmResponse $llmResponse = null,
     ): ChatbotMessage {
         return ChatbotMessage::create([
             'conversation_id' => $conversation->id,
             'role' => $role,
             'content' => $content,
             'retrieved_faq_ids' => $retrievedFaqIds,
-            'tokens_in' => $role === 'user' ? $this->llm->countTokens($content) : null,
-            'tokens_out' => $role === 'assistant' ? $this->llm->countTokens($content) : null,
-            'latency_ms' => null,
+            'tokens_in' => $llmResponse?->tokensIn,
+            'tokens_out' => $llmResponse?->tokensOut,
+            'latency_ms' => $llmResponse?->latencyMs,
             'created_at' => now(),
         ]);
     }
 
-    private function buildRecommendation(array $metadata, string $locale): string
+    private function triageSuggestions(string $step, string $locale): array
+    {
+        return match ($step) {
+            'category' => [
+                __('chatbot.category_family', [], $locale),
+                __('chatbot.category_real_estate', [], $locale),
+                __('chatbot.category_financial', [], $locale),
+                __('chatbot.category_contracts', [], $locale),
+                __('chatbot.category_other', [], $locale),
+            ],
+            'has_documents' => [
+                __('chatbot.triage_yes', [], $locale),
+                __('chatbot.triage_no', [], $locale),
+            ],
+            'format' => [
+                __('chatbot.triage_in_person', [], $locale),
+                __('chatbot.triage_video', [], $locale),
+                __('chatbot.triage_indifferent', [], $locale),
+            ],
+            'urgency' => [
+                __('chatbot.triage_this_week', [], $locale),
+                __('chatbot.triage_this_month', [], $locale),
+                __('chatbot.triage_flexible', [], $locale),
+            ],
+            default => [],
+        };
+    }
+
+    private function buildRecommendationResponse(array $metadata, string $locale): ChatbotResponse
     {
         $url = TriageFlow::buildBookingUrl($metadata, $locale);
-        $categoryLabels = [
-            'family' => __('chatbot.category_family', [], $locale),
-            'real_estate' => __('chatbot.category_real_estate', [], $locale),
-            'financial' => __('chatbot.category_financial', [], $locale),
-            'contracts' => __('chatbot.category_contracts', [], $locale),
-            'other' => __('chatbot.category_other', [], $locale),
-        ];
+        $category = $metadata['category'] ?? 'other';
 
-        $categoryLabel = $categoryLabels[$metadata['category'] ?? 'other'] ?? '';
+        $planSlug = match ($category) {
+            'family' => 'standard-online',
+            'real_estate' => 'in-office',
+            'financial' => 'standard-online',
+            'contracts' => 'standard-online',
+            default => 'free-orientation',
+        };
 
-        $formatLabel = $metadata['format'] === 'video'
-            ? __('chatbot.format_video', [], $locale)
-            : __('chatbot.format_in_person', [], $locale);
+        $format = $metadata['format'] === 'video' ? 'online' : 'in_office';
 
-        $lines = [
-            __('chatbot.recommendation_header', [], $locale),
-            '',
-            __('chatbot.recommendation_category', ['category' => $categoryLabel], $locale),
-            __('chatbot.recommendation_format', ['format' => $formatLabel], $locale),
-            '',
-            '<a href="'.e($url).'" class="btn-primary">'.__('chatbot.recommendation_book_button', [], $locale).'</a>',
-        ];
+        try {
+            $planRec = new PlanRecommendation(
+                slug: $planSlug,
+                category: $category,
+                format: $format,
+                reason: __('chatbot.recommendation_reason', [], $locale),
+            );
+        } catch (\InvalidArgumentException) {
+            $planRec = null;
+        }
 
-        return implode("\n", $lines);
+        return new ChatbotResponse(
+            answer: __('chatbot.recommendation_header', [], $locale),
+            suggestions: [],
+            recommendedPlan: $planRec,
+        );
     }
 }

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Domain\Services\AvailabilityService;
 use App\Domain\Services\BookingService;
+use App\Enums\BookingFormat;
 use App\Enums\BookingStatus;
 use App\Events\BookingConfirmed;
 use App\Events\ReceiptGenerated;
@@ -169,10 +170,10 @@ class BookingResource extends Resource
                                 ->label('Nouveau créneau')
                                 ->options(fn (Booking $record) => collect(
                                     app(AvailabilityService::class)->availableSlots(
-                                        $record->plan,
-                                        $record->format,
                                         now()->addDay()->startOfDay(),
                                         now()->addMonth()->endOfDay(),
+                                        $record->plan,
+                                        BookingFormat::from($record->format),
                                     )
                                 )->mapWithKeys(fn ($slot) => [$slot->startsAt->toIso8601String() => $slot->startsAt->format('d/m/Y H:i').' - '.$slot->endsAt->format('H:i')]))
                                 ->required(),

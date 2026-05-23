@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\ViewAction;
@@ -95,7 +96,7 @@ class ChatbotConversationResource extends Resource
             ])
             ->actions([
                 ViewAction::make(),
-                \Filament\Tables\Actions\Action::make('promoteToFaq')
+                Action::make('promoteToFaq')
                     ->label('Promouvoir en FAQ')
                     ->icon('heroicon-o-star')
                     ->color('success')
@@ -134,7 +135,7 @@ class ChatbotConversationResource extends Resource
                             ->success()
                             ->send();
                     }),
-                \Filament\Tables\Actions\Action::make('markReviewed')
+                Action::make('markReviewed')
                     ->label('Marquer revu')
                     ->icon('heroicon-o-check-circle')
                     ->action(function (ChatbotConversation $record): void {

@@ -2,7 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Domain\Chatbot\ChatbotResponse;
 use App\Domain\Services\Chatbot\ChatbotService;
+use App\Models\ConsultationPlan;
+use App\ValueObjects\MoneyMad;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Cookie;
 use Livewire\Component;
@@ -27,6 +30,12 @@ class Chatbot extends Component
 
     public ?string $error = null;
 
+    public ?array $planCard = null;
+
+    public bool $escalationPanel = false;
+
+    public bool $isOutOfScope = false;
+
     protected $conversation = null;
 
     protected ChatbotService $chatbotService;
@@ -40,7 +49,6 @@ class Chatbot extends Component
     {
         $this->suggestions = $this->defaultSuggestions();
 
-        // Check 90-day cookie for disclaimer
         if (Cookie::has(self::DISCLAIMER_COOKIE) || session()->has('chatbot_disclaimer_accepted')) {
             $this->disclaimerAccepted = true;
             $this->ensureConversation();
@@ -51,7 +59,6 @@ class Chatbot extends Component
     {
         $this->disclaimerAccepted = true;
 
-        // Set 90-day cookie
         Cookie::queue(self::DISCLAIMER_COOKIE, true, self::DISCLAIMER_DURATION * 24 * 60);
 
         session()->put('chatbot_disclaimer_accepted', true);
@@ -77,7 +84,6 @@ class Chatbot extends Component
             return;
         }
 
-        // Rate limiting check
         if ($this->isRateLimited()) {
             $this->error = __('chatbot.rate_limit_exceeded');
             $this->input = '';
@@ -89,7 +95,6 @@ class Chatbot extends Component
         $this->input = '';
         $this->error = null;
 
-        // Track message for rate limiting
         $this->trackRateLimit();
 
         $this->messages[] = [
@@ -100,14 +105,15 @@ class Chatbot extends Component
 
         $this->isTyping = true;
         $this->suggestions = [];
+        $this->planCard = null;
+        $this->escalationPanel = false;
+        $this->isOutOfScope = false;
 
         try {
             $this->ensureConversation();
 
-            // Detect mid-conversation language switch
             $this->detectLanguageSwitch($userMessage);
 
-            // Check budget before calling LLM
             if ($this->chatbotService->isBudgetExhausted()) {
                 $this->isTyping = false;
                 $this->messages[] = [
@@ -121,28 +127,10 @@ class Chatbot extends Component
 
             $response = $this->chatbotService->respondTo($this->conversation, $userMessage);
 
-            $fullResponse = '';
-
-            foreach ($response as $chunk) {
-                $fullResponse .= $chunk;
-
-                // Check for client disconnect between chunks
-                if (connection_aborted()) {
-                    break;
-                }
-            }
-
             $this->isTyping = false;
 
-            if ($fullResponse !== '') {
-                $this->messages[] = [
-                    'role' => 'assistant',
-                    'content' => $fullResponse,
-                    'created_at' => now()->toIso8601String(),
-                ];
+            $this->handleResponse($response);
 
-                $this->suggestions = $this->contextualSuggestions($fullResponse);
-            }
         } catch (\Throwable $e) {
             $this->isTyping = false;
 
@@ -150,7 +138,9 @@ class Chatbot extends Component
                 $this->error = __('chatbot.error_fallback').' '.$e->getMessage();
             } else {
                 $this->error = __('chatbot.error_fallback');
-                \Sentry\captureException($e);
+                if (class_exists('\Sentry')) {
+                    \Sentry\captureException($e);
+                }
             }
 
             $this->messages[] = [
@@ -172,6 +162,51 @@ class Chatbot extends Component
         return view('livewire.chatbot');
     }
 
+    private function handleResponse(ChatbotResponse $response): void
+    {
+        $this->messages[] = [
+            'role' => 'assistant',
+            'content' => $response->answer,
+            'created_at' => now()->toIso8601String(),
+        ];
+
+        $this->suggestions = $response->suggestions;
+
+        if ($response->recommendedPlan !== null && ! $response->outOfScope) {
+            $plan = ConsultationPlan::where('slug', $response->recommendedPlan->slug)->first();
+
+            if ($plan) {
+                $locale = app()->getLocale();
+                $price = new MoneyMad($plan->price_centimes);
+
+                $this->planCard = [
+                    'name' => $plan->name_translations[$locale] ?? $plan->slug,
+                    'price' => $price->formatted($locale),
+                    'duration_minutes' => $plan->duration_minutes,
+                    'format' => $plan->format,
+                    'format_icon' => $plan->format === 'online' ? 'video' : 'building',
+                    'reason' => $response->recommendedPlan->reason,
+                    'booking_url' => $response->recommendedPlan->toBookingUrl($locale),
+                ];
+            }
+        }
+
+        if ($response->escalate) {
+            $this->escalationPanel = true;
+            $this->suggestions = [];
+        }
+
+        if ($response->outOfScope) {
+            $this->isOutOfScope = true;
+            $this->planCard = null;
+            $this->suggestions = [];
+        }
+
+        if ($this->escalationPanel || $this->isOutOfScope) {
+            $this->planCard = null;
+        }
+    }
+
     private function detectLanguageSwitch(string $message): void
     {
         if (! $this->conversation) {
@@ -191,7 +226,6 @@ class Chatbot extends Component
             return;
         }
 
-        // Only switch after 2+ messages in the new language
         if ($detected !== $currentLocale) {
             $userMessages = collect($this->messages)->where('role', 'user')->values();
             $recentUserMessages = $userMessages->slice(-2);
@@ -255,21 +289,6 @@ class Chatbot extends Component
             __('chatbot.suggestion_booking'),
             __('chatbot.suggestion_pricing'),
         ];
-    }
-
-    private function contextualSuggestions(string $response): array
-    {
-        $suggestions = [];
-
-        if (str_contains($response, '?')) {
-            $suggestions[] = __('chatbot.suggestion_more_details');
-        }
-
-        $suggestions[] = __('chatbot.suggestion_documents');
-        $suggestions[] = __('chatbot.suggestion_booking');
-        $suggestions[] = __('chatbot.suggestion_speak_to_human');
-
-        return array_slice($suggestions, 0, 4);
     }
 
     private function isRateLimited(): bool
