@@ -21,7 +21,8 @@ final class AvailabilityService
         ConsultationPlan $plan,
         BookingFormat $format,
     ): array {
-        $cacheKey = "slots:{$plan->id}:{$format->value}:{$from->format('Ymd')}:{$to->format('Ymd')}";
+        $version = \Cache::get("slots:v:{$plan->id}:{$format->value}", 0);
+        $cacheKey = "slots:{$plan->id}:{$format->value}:{$version}:{$from->format('Ymd')}:{$to->format('Ymd')}";
 
         return \Cache::remember($cacheKey, 60, function () use ($from, $to, $plan, $format) {
             $slots = [];
@@ -115,7 +116,7 @@ final class AvailabilityService
 
     public function clearSlotsCache(ConsultationPlan $plan, BookingFormat $format): void
     {
-        \Cache::forget("slots:{$plan->id}:{$format->value}:*");
+        \Cache::increment("slots:v:{$plan->id}:{$format->value}");
     }
 
     public function assertSlotIsFree(TimeSlot $slot, BookingFormat $format): void

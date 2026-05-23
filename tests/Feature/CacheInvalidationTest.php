@@ -18,20 +18,24 @@ test('availableSlots caches results', function () {
     $from = CarbonImmutable::tomorrow();
     $to = $from->addDays(7);
 
-    $key = "slots:{$this->plan->id}:online:{$from->format('Ymd')}:{$to->format('Ymd')}";
+    $version = Cache::get("slots:v:{$this->plan->id}:online", 0);
+    $key = "slots:{$this->plan->id}:online:{$version}:{$from->format('Ymd')}:{$to->format('Ymd')}";
 
     $this->service->availableSlots($from, $to, $this->plan, BookingFormat::ONLINE);
 
     expect(Cache::has($key))->toBeTrue();
 });
 
-test('clearSlotsCache removes cached entry', function () {
+test('clearSlotsCache increments version to invalidate cache', function () {
     $from = CarbonImmutable::tomorrow();
     $to = $from->addDays(7);
+
+    $versionBefore = Cache::get("slots:v:{$this->plan->id}:online", 0);
 
     $this->service->availableSlots($from, $to, $this->plan, BookingFormat::ONLINE);
 
     $this->service->clearSlotsCache($this->plan, BookingFormat::ONLINE);
 
-    expect(Cache::has("slots:{$this->plan->id}:online:*"))->toBeFalse();
+    $versionAfter = Cache::get("slots:v:{$this->plan->id}:online", 0);
+    expect($versionAfter)->toBe($versionBefore + 1);
 });
