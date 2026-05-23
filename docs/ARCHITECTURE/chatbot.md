@@ -32,14 +32,15 @@ User message → Pre-processing → Intent classification → Branch
 ## Components
 
 | Component | Class | Responsibility |
-|---|---|---|
+|---|---|---|---|
 | Conversation manager | `ChatbotService` | Orchestrates everything |
 | Intent classifier | `IntentClassifier` | First-pass categorization |
-| FAQ retriever | `FaqRetriever` | pgvector search over `faqs.embedding_xx` |
-| LLM client | `ClaudeClient` | HTTP calls to Anthropic API |
+| FAQ retriever | `FaqRetriever` | Keyword search over FAQ translations |
+| LLM client (interface) | `LlmClient` (contract), `CerebrasClient` (impl) | HTTP calls to Cerebras API (OpenAI-compatible) |
 | Triage flow | `TriageFlow` | Multi-step Q&A to recommend a plan |
 | Escalation handler | `EscalationHandler` | Generates WhatsApp deep-link + notifies admin |
-| Conversation logger | `ConversationLogger` (queued job) | Persists messages |
+| Output filter | `OutputFilter` | Post-generation regex check for forbidden patterns |
+| Conversation logger | `ChatbotMessage` model (inline) | Persists messages synchronously |
 
 ## Conversation persistence
 
@@ -125,9 +126,11 @@ class FaqRetriever
 
 ### Provider
 
-- **Anthropic Claude** via the official HTTP API.
-- Model: `claude-sonnet-4-5` (current).
-- Streaming responses via Server-Sent Events.
+- **Cerebras** via the OpenAI-compatible HTTP API (`https://api.cerebras.ai/v1`).
+- Model: `gpt-oss-120b` (120B params, ~3000 tok/s).
+- Streaming responses via Server-Sent Events (OpenAI SSE format).
+- Free tier: 1,000,000 tokens/day (no credit card required).
+- Cost: $0 for free tier; $0.50/1M tokens if upgraded.
 
 ### System prompt
 
@@ -146,14 +149,15 @@ Key elements:
 - Format: short answers (2-4 sentences), no markdown unless emphasizing.
 - Disclaimer line appended to every substantive answer.
 
-### Message structure sent to Claude
+### Message structure sent to Cerebras
 
 ```json
 {
-  "model": "claude-sonnet-4-5",
-  "max_tokens": 600,
-  "system": "<system prompt for resolved locale>",
+  "model": "gpt-oss-120b",
+  "max_completion_tokens": 600,
+  "temperature": 0.3,
   "messages": [
+    { "role": "system", "content": "<system prompt for resolved locale>" },
     { "role": "user", "content": "Quels documents pour un divorce ?" },
     { "role": "assistant", "content": "<previous response>" },
     {
@@ -260,12 +264,11 @@ Implemented at multiple layers:
 ## Failure modes
 
 | Failure | Behavior |
-|---|---|
-| Claude API timeout | Show fallback message, suggest WhatsApp |
-| Claude API rate limited | Same fallback |
-| Anthropic credit exhausted | Same fallback |
-| Embedding API down | Skip retrieval, send empty context to Claude (degraded but works) |
-| pgvector slow query | Query timeout at 500ms, skip retrieval |
+|---|---|---|
+| Cerebras API timeout | Show fallback message, suggest WhatsApp |
+| Cerebras API rate limited | Same fallback |
+| Cerebras quota exhausted | Same fallback |
+| Output filter triggered | Filtered response shown + escalation suggestion |
 | Browser closes mid-stream | Server cancels upstream call to save tokens |
 
 All failures logged to Sentry with the conversation ID for review.

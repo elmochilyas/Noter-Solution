@@ -51,4 +51,13 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    'cerebras' => [
+        'api_key' => env('CEREBRAS_API_KEY'),
+        'model' => env('CEREBRAS_MODEL', 'gpt-oss-120b'),
+        'base_url' => 'https://api.cerebras.ai/v1',
+        'max_tokens' => env('CEREBRAS_MAX_TOKENS', 600),
+        'temperature' => env('CEREBRAS_TEMPERATURE', 0.3),
+        'monthly_budget' => env('CEREBRAS_MONTHLY_BUDGET', 5.0),
+    ],
+
 ];

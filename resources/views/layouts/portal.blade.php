@@ -102,9 +102,11 @@
         @auth('client')
             <script>
                 document.getElementById('mobile-menu-btn')?.addEventListener('click', function () {
-                    document.getElementById('mobile-menu')?.classList.toggle('hidden');
+                    document.getElementById('mobile-menu')?.toggleClass('hidden');
                 });
             </script>
         @endauth
+
+        <livewire:chatbot />
     </body>
 </html>

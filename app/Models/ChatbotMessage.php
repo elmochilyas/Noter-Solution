@@ -20,6 +20,7 @@ class ChatbotMessage extends Model
         'tokens_in',
         'tokens_out',
         'latency_ms',
+        'created_at',
     ];
 
     protected function casts(): array

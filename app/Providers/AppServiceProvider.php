@@ -5,6 +5,10 @@ namespace App\Providers;
 use App\Channels\TwilioSmsChannel;
 use App\Channels\TwilioWhatsAppChannel;
 use App\Domain\Payment\PaymentGateway;
+use App\Domain\Services\Chatbot\Contracts\LlmClient;
+use App\Infrastructure\Chatbot\CerebrasClient;
+use App\Models\Client;
+use App\Observers\ClientObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,10 +26,14 @@ class AppServiceProvider extends ServiceProvider
 
             return new $class;
         });
+
+        $this->app->bind(LlmClient::class, CerebrasClient::class);
     }
 
     public function boot(): void
     {
+        Client::observe(ClientObserver::class);
+
         $this->app->when(TwilioSmsChannel::class)
             ->needs('$from')
             ->give(config('services.twilio.from_sms'));

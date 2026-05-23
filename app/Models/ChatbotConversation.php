@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +19,7 @@ class ChatbotConversation extends Model
         'session_id',
         'client_id',
         'locale',
+        'metadata',
         'intent_resolved',
         'led_to_booking_id',
         'started_at',
@@ -30,6 +32,7 @@ class ChatbotConversation extends Model
     {
         return [
             'uuid' => 'string',
+            'metadata' => 'array',
             'started_at' => 'datetime',
             'last_message_at' => 'datetime',
             'ended_at' => 'datetime',
@@ -50,5 +53,15 @@ class ChatbotConversation extends Model
     public function ledToBooking(): BelongsTo
     {
         return $this->belongsTo(Booking::class, 'led_to_booking_id');
+    }
+
+    public function getPurgeAfterAttribute(): ?\DateTimeInterface
+    {
+        return $this->started_at?->addMonths(18);
+    }
+
+    public function scopeShouldPurge(Builder $query): Builder
+    {
+        return $query->where('started_at', '<', now()->subMonths(18));
     }
 }

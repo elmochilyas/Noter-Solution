@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('chatbot_messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('conversation_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('conversation_id')->constrained('chatbot_conversations')->cascadeOnDelete();
             $table->string('role', 10);
             $table->text('content');
             $table->jsonb('retrieved_faq_ids')->nullable();
