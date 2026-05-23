@@ -27,12 +27,12 @@ final class ScheduleReminders implements ShouldQueue
 
         if ($hoursBefore24 > 0) {
             SendBookingNotification::dispatch($booking, '24h')
-                ->delay(now()->addHours((int) $hoursBefore24));
+                ->delay(now()->addHours($hoursBefore24));
         }
 
         if ($hoursBefore1 > 0) {
             SendBookingNotification::dispatch($booking, '1h')
-                ->delay(now()->addHours((int) $hoursBefore1));
+                ->delay(now()->addHours($hoursBefore1));
         }
     }
 }

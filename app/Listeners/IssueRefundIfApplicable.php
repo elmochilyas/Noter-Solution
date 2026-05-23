@@ -6,8 +6,9 @@ use App\Domain\Services\PaymentService;
 use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
 use App\ValueObjects\MoneyMad;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-final class IssueRefundIfApplicable
+final class IssueRefundIfApplicable implements ShouldQueue
 {
     public function __construct(
         private readonly PaymentService $payments,
