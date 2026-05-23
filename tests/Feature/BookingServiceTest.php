@@ -6,6 +6,7 @@ use App\Enums\BookingStatus;
 use App\Enums\Locale;
 use App\Enums\ServiceCategory;
 use App\Events\BookingConfirmed;
+use App\Events\BookingRescheduled;
 use App\Exceptions\Domain\InvalidBookingTransition;
 use App\Models\Booking;
 use App\Models\Client;
@@ -124,6 +125,27 @@ test('reschedule creates new booking and cancels old one', function () {
 
     expect($newBooking)->toBeInstanceOf(Booking::class);
     expect($newBooking->status)->toBe(BookingStatus::PENDING_PAYMENT->value);
+});
+
+test('reschedule dispatches BookingRescheduled event', function () {
+    Event::fake();
+
+    $booking = Booking::factory()->create([
+        'status' => BookingStatus::CONFIRMED->value,
+        'client_id' => $this->client->id,
+    ]);
+
+    $newSlot = new TimeSlot(
+        CarbonImmutable::parse('+14 days 14:00'),
+        CarbonImmutable::parse('+14 days 14:30'),
+    );
+
+    $newBooking = $this->service->reschedule($booking, $newSlot);
+
+    Event::assertDispatched(BookingRescheduled::class, function ($event) use ($booking, $newBooking) {
+        return $event->oldBooking->is($booking)
+            && $event->newBooking->is($newBooking);
+    });
 });
 
 test('cancel throws on invalid transition', function () {

@@ -8,6 +8,7 @@ use App\Enums\BookingStatus;
 use App\Enums\Locale;
 use App\Enums\ServiceCategory;
 use App\Events\BookingConfirmed;
+use App\Events\BookingRescheduled;
 use App\Models\Booking;
 use App\Models\Client;
 use App\Models\ConsultationPlan;
@@ -118,6 +119,10 @@ final class BookingService
             totalCentimes: $booking->total_centimes,
         );
 
-        return $this->createPending($data, $booking->client);
+        $newBooking = $this->createPending($data, $booking->client);
+
+        BookingRescheduled::dispatch($booking, $newBooking);
+
+        return $newBooking;
     }
 }
