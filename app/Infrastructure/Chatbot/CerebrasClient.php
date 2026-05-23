@@ -2,6 +2,8 @@
 
 namespace App\Infrastructure\Chatbot;
 
+use App\Domain\Chatbot\LlmRequest;
+use App\Domain\Chatbot\LlmResponse;
 use App\Domain\Services\Chatbot\Contracts\LlmClient;
 use Generator;
 use Illuminate\Http\Client\ConnectionException;
@@ -24,33 +26,51 @@ final class CerebrasClient implements LlmClient
 
     public function __construct()
     {
-        $this->apiKey = config('services.cerebras.api_key');
-        $this->model = config('services.cerebras.model', 'gpt-oss-120b');
-        $this->baseUrl = config('services.cerebras.base_url', 'https://api.cerebras.ai/v1');
+        $this->apiKey = config('chatbot.provider.api_key');
+        $this->model = config('chatbot.provider.model', 'gpt-oss-120b');
+        $this->baseUrl = config('chatbot.provider.base_url', 'https://api.cerebras.ai/v1');
     }
 
-    public function generate(
-        string $systemPrompt,
-        array $messages,
-        int $maxTokens = 600,
-        float $temperature = 0.3,
-    ): string {
-        $maxTokens = $this->enforceTokenBudget($systemPrompt, $messages, $maxTokens);
+    public function complete(LlmRequest $request): LlmResponse
+    {
+        $maxTokens = $this->enforceTokenBudget($request->system, $request->messages, $request->maxTokens);
 
-        $payload = $this->buildPayload($systemPrompt, $messages, $maxTokens, $temperature, false);
+        $payload = $this->buildPayload(
+            systemPrompt: $request->system,
+            messages: $request->messages,
+            maxTokens: $maxTokens,
+            temperature: $request->temperature,
+            stream: false,
+            responseFormat: $request->responseFormat,
+        );
 
+        $start = hrtime(true);
         $attempts = 0;
 
         while ($attempts <= self::MAX_RETRIES) {
             try {
-                $response = Http::timeout(15)
+                $response = Http::timeout(config('chatbot.provider.timeout', 15))
                     ->withToken($this->apiKey)
                     ->post("{$this->baseUrl}/chat/completions", $payload);
+
+                $latencyMs = (int) ((hrtime(true) - $start) / 1_000_000);
 
                 if ($response->successful()) {
                     $data = $response->json();
 
-                    return $data['choices'][0]['message']['content'] ?? '';
+                    $content = $data['choices'][0]['message']['content'] ?? '';
+                    $usage = $data['usage'] ?? [];
+                    $tokensIn = $usage['prompt_tokens'] ?? $this->countTokens($request->system.collect($request->messages)->pluck('content')->implode(' '));
+                    $tokensOut = $usage['completion_tokens'] ?? $this->countTokens($content);
+                    $model = $data['model'] ?? $this->model;
+
+                    return new LlmResponse(
+                        content: $content,
+                        tokensIn: $tokensIn,
+                        tokensOut: $tokensOut,
+                        latencyMs: $latencyMs,
+                        model: $model,
+                    );
                 }
 
                 if ($response->status() < 500 || $attempts >= self::MAX_RETRIES) {
@@ -65,6 +85,8 @@ final class CerebrasClient implements LlmClient
                 $attempts++;
                 Log::warning('Retrying Cerebras API', ['attempt' => $attempts, 'status' => $response->status()]);
             } catch (ConnectionException $e) {
+                $latencyMs = (int) ((hrtime(true) - $start) / 1_000_000);
+
                 if ($attempts >= self::MAX_RETRIES) {
                     throw new \RuntimeException('Cerebras API connection failed after retries: '.$e->getMessage());
                 }
@@ -77,6 +99,28 @@ final class CerebrasClient implements LlmClient
         throw new \RuntimeException('Cerebras API request failed after max retries');
     }
 
+    public function name(): string
+    {
+        return 'cerebras-'.$this->model;
+    }
+
+    public function generate(
+        string $systemPrompt,
+        array $messages,
+        int $maxTokens = 600,
+        float $temperature = 0.3,
+    ): string {
+        $request = new LlmRequest(
+            system: $systemPrompt,
+            messages: $messages,
+            maxTokens: $maxTokens,
+            temperature: $temperature,
+            responseFormat: null,
+        );
+
+        return $this->complete($request)->content;
+    }
+
     public function generateStreamed(
         string $systemPrompt,
         array $messages,
@@ -85,7 +129,7 @@ final class CerebrasClient implements LlmClient
     ): Generator {
         $maxTokens = $this->enforceTokenBudget($systemPrompt, $messages, $maxTokens);
 
-        $payload = $this->buildPayload($systemPrompt, $messages, $maxTokens, $temperature, true);
+        $payload = $this->buildPayload($systemPrompt, $messages, $maxTokens, $temperature, true, null);
 
         $response = Http::timeout(20)
             ->withToken($this->apiKey)
@@ -163,6 +207,7 @@ final class CerebrasClient implements LlmClient
         int $maxTokens,
         float $temperature,
         bool $stream,
+        ?string $responseFormat = 'json_object',
     ): array {
         $formatted = [];
 
@@ -177,12 +222,18 @@ final class CerebrasClient implements LlmClient
             ];
         }
 
-        return [
+        $payload = [
             'model' => $this->model,
             'messages' => $formatted,
             'max_completion_tokens' => $maxTokens,
             'temperature' => $temperature,
             'stream' => $stream,
         ];
+
+        if ($responseFormat !== null) {
+            $payload['response_format'] = ['type' => $responseFormat];
+        }
+
+        return $payload;
     }
 }

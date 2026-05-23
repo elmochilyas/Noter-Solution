@@ -2,6 +2,8 @@
 
 namespace App\Domain\Services\Chatbot\Contracts;
 
+use App\Domain\Chatbot\LlmRequest;
+use App\Domain\Chatbot\LlmResponse;
 use Generator;
 
 interface LlmClient
@@ -21,4 +23,8 @@ interface LlmClient
     ): Generator;
 
     public function countTokens(string $text): int;
+
+    public function complete(LlmRequest $request): LlmResponse;
+
+    public function name(): string;
 }
