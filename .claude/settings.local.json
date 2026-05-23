@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(gh repo *)",
+      "Bash(npm list *)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(uipro init *)",
+      "Bash(Get-ChildItem -Recurse \".claude\")",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Pc\\\\Herd\\\\noter\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Get-Content \"C:\\\\Users\\\\Pc\\\\.claude\\\\projects\\\\C--Users-Pc-Herd-noter\\\\5042300d-7c64-4c9e-8a4f-271cca0d46d6.jsonl\")",
+      "Bash(Select-Object -Last 100)",
+      "Bash(python3 -c \"import sys, json; lines = sys.stdin.readlines\\(\\); [print\\(json.loads\\(l\\).get\\('role','?'\\), ':', str\\(json.loads\\(l\\).get\\('content',''\\)\\)[:200]\\) for l in lines[-20:]]\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 *)",
+      "Bash(php *)"
+    ]
+  }
+}
