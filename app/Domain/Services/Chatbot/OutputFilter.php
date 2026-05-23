@@ -2,6 +2,8 @@
 
 namespace App\Domain\Services\Chatbot;
 
+use App\Models\ConsultationPlan;
+
 final class OutputFilter
 {
     private const FORBIDDEN_PATTERNS = [
@@ -18,15 +20,17 @@ final class OutputFilter
         // Guarantees / promises
         '/\b(?:garanti|garantie|guaranteed|مضمون|مضمونة|garantissons)\b/i',
 
-        // MAD/DH amounts not inside a context block
-        '/\b\d{1,3}(?:\s?)(?:DH|MAD|د\.م\.|درهم)\b(?!.*(?:contexte|context))/i',
+        // Authentication act fees — hard reject (amounts NOT in consultation plans)
+        // This is checked dynamically in violationCount against allowed prices
     ];
 
     private const ESCALATION_THRESHOLD = 2;
 
-    public function filter(string $response): string
+    private const AMOUNT_PATTERN = '/\b(\d{1,4})\s?(DH|MAD|د\.م\.|درهم)\b/i';
+
+    public function filter(string $response, array $allowedAmounts = []): string
     {
-        $violations = $this->violationCount($response);
+        $violations = $this->violationCount($response, null, $allowedAmounts);
 
         if ($violations >= self::ESCALATION_THRESHOLD) {
             return 'ESCALATE';
@@ -35,7 +39,7 @@ final class OutputFilter
         return $response;
     }
 
-    public function violationCount(string $response): int
+    public function violationCount(string $response, ?string $locale = null, array $allowedAmounts = []): int
     {
         $violations = 0;
 
@@ -45,20 +49,60 @@ final class OutputFilter
             }
         }
 
+        // Check for unauthorized amounts: only amounts NOT in allowedPrices are violations
+        if (preg_match_all(self::AMOUNT_PATTERN, $response, $matches)) {
+            foreach ($matches[0] as $idx => $fullMatch) {
+                $amount = (int) $matches[1][$idx];
+                $currency = $matches[2][$idx];
+
+                // Convert to centimes for comparison
+                $centimes = $amount * 100;
+
+                // If this amount is a known consultation price, it's allowed
+                if (in_array($centimes, $allowedAmounts, true)) {
+                    continue;
+                }
+
+                // Any other amount is a violation (likely an act fee)
+                $violations++;
+            }
+        }
+
         return $violations;
     }
 
-    public function hasViolations(string $response): bool
+    public function hasViolations(string $response, ?string $locale = null, array $allowedAmounts = []): bool
     {
-        return $this->violationCount($response) > 0;
+        return $this->violationCount($response, $locale, $allowedAmounts) > 0;
     }
 
-    public function clean(string $response): string
+    public function clean(string $response, array $allowedAmounts = []): string
     {
         foreach (self::FORBIDDEN_PATTERNS as $pattern) {
             $response = preg_replace($pattern, '[contenu filtré]', $response);
         }
 
+        // Only clean amounts NOT in allowedPrices
+        if (preg_match_all(self::AMOUNT_PATTERN, $response, $matches)) {
+            foreach ($matches[0] as $idx => $fullMatch) {
+                $amount = (int) $matches[1][$idx];
+                $centimes = $amount * 100;
+
+                if (! in_array($centimes, $allowedAmounts, true)) {
+                    $response = str_replace($fullMatch, '[contenu filtré]', $response);
+                }
+            }
+        }
+
         return $response;
+    }
+
+    public function getAllowedAmounts(): array
+    {
+        return ConsultationPlan::where('is_active', true)
+            ->pluck('price_centimes')
+            ->unique()
+            ->values()
+            ->toArray();
     }
 }
