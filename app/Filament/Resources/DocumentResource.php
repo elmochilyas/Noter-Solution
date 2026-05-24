@@ -83,7 +83,7 @@ class DocumentResource extends Resource
                         'yes' => 'Expirés',
                         'no' => 'Non expirés',
                     ])
-                    ->query(fn ($query, $state) => $state['value'] === 'yes'
+                    ->query(fn ($query, $state) => $state === 'yes'
                         ? $query->where('purge_after', '<=', now())
                         : $query->where(function ($q) {
                             $q->whereNull('purge_after')->orWhere('purge_after', '>', now());
