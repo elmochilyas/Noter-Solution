@@ -53,7 +53,7 @@ class MagicLinkController extends Controller
             $client = Client::create([
                 'uuid' => (string) Str::uuid(),
                 'email' => $email,
-                'phone' => '0000000000',
+                'phone' => null,
                 'full_name' => $email,
                 'preferred_locale' => $locale,
             ]);

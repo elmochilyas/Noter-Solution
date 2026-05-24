@@ -93,3 +93,31 @@ test('client can reschedule booking', function () {
 test('guest cannot access reschedule', function () {
     $this->get('/fr/portal/bookings/SBA-TEST/reschedule')->assertRedirect();
 });
+
+test('reschedule does not crash when client has no phone', function () {
+    $nextSlot = CarbonImmutable::now()->addDays(3)->setHours(10)->setMinutes(0)->setSeconds(0);
+
+    $clientNoPhone = Client::factory()->create(['phone' => null]);
+
+    $booking = Booking::factory()->confirmed()->create([
+        'client_id' => $clientNoPhone->id,
+        'consultation_plan_id' => $this->plan->id,
+        'starts_at' => $nextSlot->addDay(),
+        'format' => 'online',
+        'total_centimes' => 50000,
+    ]);
+
+    $this->actingAs($clientNoPhone, 'client')
+        ->post("/fr/portal/bookings/{$booking->reference}/reschedule", [
+            'starts_at' => $nextSlot->toIso8601String(),
+        ])
+        ->assertRedirect();
+
+    $booking->refresh();
+    expect($booking->status)->toBe('cancelled');
+
+    $newBooking = Booking::where('client_id', $clientNoPhone->id)
+        ->where('status', 'pending_payment')
+        ->first();
+    expect($newBooking)->not->toBeNull();
+});

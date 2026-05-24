@@ -38,6 +38,15 @@ test('submitting unknown email still shows sent page', function () {
         ->assertRedirect('/fr/portal/login/sent');
 });
 
+test('new client created via magic link has no placeholder phone', function () {
+    $this->post('/fr/portal/login', ['email' => 'newclient@example.com'])
+        ->assertRedirect('/fr/portal/login/sent');
+
+    $client = Client::where('email', 'newclient@example.com')->first();
+    expect($client)->not->toBeNull();
+    expect($client->phone)->toBeNull();
+});
+
 test('magic link sent page renders', function () {
     $this->get('/fr/portal/login/sent')
         ->assertStatus(200)

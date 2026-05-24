@@ -115,6 +115,11 @@ final class BookingService
 
         $this->cancel($booking, 'rescheduled', $booking->client);
 
+        $rawPhone = $booking->client?->phone;
+        $clientPhone = $rawPhone
+            ? MoroccanPhoneNumber::fromInput($rawPhone)
+            : new MoroccanPhoneNumber('+212600000000');
+
         $data = new BookingData(
             consultationPlanId: $booking->consultation_plan_id,
             serviceCategory: ServiceCategory::from($booking->service_category),
@@ -122,7 +127,7 @@ final class BookingService
             slot: $newSlot,
             clientFullName: $booking->client->full_name,
             clientEmail: $booking->client->email,
-            clientPhone: MoroccanPhoneNumber::fromInput($booking->client->phone),
+            clientPhone: $clientPhone,
             description: $booking->description,
             locale: Locale::tryFrom(app()->getLocale()) ?? Locale::FR,
             totalCentimes: $booking->total_centimes,
