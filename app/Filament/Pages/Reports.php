@@ -109,7 +109,8 @@ class Reports extends Page
 
         foreach ($receipts as $receipt) {
             if ($receiptsDisk->exists($receipt->storage_path)) {
-                $zip->addFile($receiptsDisk->path($receipt->storage_path), "recu-{$receipt->number}.pdf");
+                $contents = $receiptsDisk->get($receipt->storage_path);
+                $zip->addFromString("recu-{$receipt->number}.pdf", $contents);
             }
         }
 
