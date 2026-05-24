@@ -32,7 +32,7 @@ final class IssueRefundIfApplicable implements ShouldQueue
             return;
         }
 
-        $hoursBeforeAppointment = max(0, now()->diffInHours($booking->starts_at, false));
+        $hoursBeforeAppointment = max(0, $booking->cancelled_at->diffInHours($booking->starts_at, false));
 
         $refundPercentage = match (true) {
             $hoursBeforeAppointment >= 24 => 100,

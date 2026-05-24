@@ -103,6 +103,33 @@ test('IssueRefundIfApplicable does nothing for rescheduled bookings', function (
     expect($payment->refunds)->toBeEmpty();
 });
 
+test('IssueRefundIfApplicable uses cancelled_at not queue-time when calculating refund', function () {
+    Carbon::setTestNow(Carbon::parse('-3 hours'));
+
+    $booking = Booking::factory()->create([
+        'starts_at' => Carbon::parse('+25 hours'),
+        'ends_at' => Carbon::parse('+26 hours'),
+        'status' => BookingStatus::CANCELLED->value,
+        'cancelled_at' => now(),
+    ]);
+
+    $payment = Payment::factory()->succeeded()->create([
+        'booking_id' => $booking->id,
+        'gateway' => 'stripe',
+        'amount_centimes' => 50000,
+    ]);
+
+    Carbon::setTestNow(); // Advance to real time (simulating queue delay)
+
+    $service = app(PaymentService::class);
+    $listener = new IssueRefundIfApplicable($service);
+    $listener->handle(new BookingCancelled($booking));
+
+    $payment->refresh();
+    expect(Refund::where('payment_id', $payment->id)->exists())->toBeTrue();
+    expect(Refund::where('payment_id', $payment->id)->first()->amount_centimes)->toBe(50000);
+});
+
 test('IssueRefundIfApplicable does nothing for cash payments', function () {
     $booking = Booking::factory()->create([
         'starts_at' => Carbon::parse('+36 hours'),
