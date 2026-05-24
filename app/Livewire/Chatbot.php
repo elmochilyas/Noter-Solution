@@ -153,6 +153,54 @@ class Chatbot extends Component
 
     public function sendSuggestion(string $suggestion): void
     {
+        $this->ensureConversation();
+
+        $metadata = $this->conversation->metadata ?? [];
+        if (($metadata['triage_state'] ?? 'idle') === 'active') {
+            $this->input = '';
+            $this->error = null;
+            $this->isTyping = true;
+            $this->suggestions = [];
+            $this->planCard = null;
+            $this->escalationPanel = false;
+            $this->isOutOfScope = false;
+
+            $label = Lang::has('chatbot.category_'.$suggestion)
+                ? __('chatbot.category_'.$suggestion)
+                : (Lang::has('chatbot.triage_'.$suggestion)
+                    ? __('chatbot.triage_'.$suggestion)
+                    : $suggestion);
+
+            $this->messages[] = [
+                'role' => 'user',
+                'content' => $label,
+                'created_at' => now()->toIso8601String(),
+            ];
+
+            try {
+                $response = $this->chatbotService->handleTriageChipClick($this->conversation, $suggestion);
+                $this->isTyping = false;
+                $this->handleResponse($response);
+            } catch (\Throwable $e) {
+                $this->isTyping = false;
+                if (config('app.debug')) {
+                    $this->error = __('chatbot.error_fallback').' '.$e->getMessage();
+                } else {
+                    $this->error = __('chatbot.error_fallback');
+                    if (class_exists('\Sentry')) {
+                        \Sentry\captureException($e);
+                    }
+                }
+                $this->messages[] = [
+                    'role' => 'assistant',
+                    'content' => __('chatbot.error_fallback_contact'),
+                    'created_at' => now()->toIso8601String(),
+                ];
+            }
+
+            return;
+        }
+
         $this->input = $suggestion;
         $this->send();
     }

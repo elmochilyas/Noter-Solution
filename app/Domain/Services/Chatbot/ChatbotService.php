@@ -14,6 +14,7 @@ use App\Models\ConsultationPlan;
 use App\Models\ContactMessage;
 use App\Models\Faq;
 use App\Services\Chatbot\ChatbotResponseParser;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Sentry;
@@ -24,9 +25,11 @@ final class ChatbotService
 
     private const STRICTER_SYSTEM_PROMPT_KEY = 'chatbot.system_prompt_stricter';
 
-    private const HISTORY_LIMIT = 6;
+    private const HISTORY_TOKEN_BUDGET = 1500;
 
     private const MAX_INPUT_LENGTH = 500;
+
+    private const TRIAGE_ABANDON_PROMPT_SUFFIX = "\n\nNOTE : L'utilisateur était en train de remplir un formulaire de prise de rendez-vous mais a changé d'avis et a posé une question libre. Ignore le formulaire, réponds à sa question normalement.";
 
     public function __construct(
         private readonly LlmClient $llm,
@@ -35,6 +38,8 @@ final class ChatbotService
         private readonly EscalationHandler $escalation,
         private readonly OutputFilter $filter,
         private readonly ChatbotResponseParser $parser,
+        private readonly ChipFilter $chipFilter,
+        private readonly RepetitionGuard $repetitionGuard,
     ) {}
 
     public function startConversation(string $sessionId, string $locale): ChatbotConversation
@@ -94,6 +99,7 @@ final class ChatbotService
         $intent = $this->classifier->classify($userMessage, $locale);
 
         if ($intent === ChatbotIntent::OUT_OF_SCOPE) {
+
             $response = new ChatbotResponse(
                 answer: __('chatbot.out_of_scope', [], $locale),
                 outOfScope: true,
@@ -139,30 +145,17 @@ final class ChatbotService
         }
 
         $faqs = $this->retrieveFaqs($userMessage, $locale);
-        $faqContext = $this->buildFaqContext($faqs);
+        $faqContext = $this->buildFaqContext($faqs, $locale);
 
         $metadata = $conversation->metadata ?? [];
+        $triageAbandoned = false;
 
         if (($metadata['triage_state'] ?? 'idle') === 'active') {
-            $step = $metadata['triage_step'] ?? 'category';
-            $next = $this->triage->processStep($step, $userMessage, $metadata);
-
+            $metadata['triage_state'] = 'idle';
+            $metadata['triage_step'] = null;
             $conversation->metadata = $metadata;
-
-            if ($next === null) {
-                $conversation->intent_resolved = 'booked';
-                $conversation->save();
-
-                return $this->buildRecommendationResponse($metadata, $locale);
-            }
-
             $conversation->save();
-            $this->recordMessage($conversation, 'assistant', $next);
-
-            return new ChatbotResponse(
-                answer: $next,
-                suggestions: $this->triageSuggestions($metadata['triage_step'], $locale),
-            );
+            $triageAbandoned = true;
         }
 
         if ($intent === ChatbotIntent::BOOKING_INTENT) {
@@ -179,7 +172,37 @@ final class ChatbotService
         }
 
         // Main LLM generation with structured response
-        return $this->generateStructuredResponse($conversation, $history, $userMessage, $faqContext, $faqs, $locale);
+        return $this->generateStructuredResponse($conversation, $history, $userMessage, $faqContext, $faqs, $locale, $triageAbandoned);
+    }
+
+    public function handleTriageChipClick(ChatbotConversation $conversation, string $chipValue): ChatbotResponse
+    {
+        $metadata = $conversation->metadata;
+
+        if (($metadata['triage_state'] ?? 'idle') !== 'active') {
+            throw new \RuntimeException('handleTriageChipClick called when triage is not active');
+        }
+
+        $this->recordMessage($conversation, 'user', $this->translateChipLabel($chipValue, $conversation->locale));
+
+        $next = $this->triage->processStep($metadata['triage_step'] ?? 'category', $chipValue, $metadata);
+
+        $conversation->metadata = $metadata;
+        $conversation->last_message_at = now();
+
+        if ($next === null) {
+            $conversation->intent_resolved = 'booked';
+            $conversation->save();
+
+            return $this->buildRecommendationResponse($metadata, $conversation->locale);
+        }
+
+        $conversation->save();
+
+        return new ChatbotResponse(
+            answer: $next,
+            suggestions: $this->triageSuggestions($metadata['triage_step'], $conversation->locale),
+        );
     }
 
     public function escalateToHuman(ChatbotConversation $conversation, ?string $summary = null): array
@@ -224,7 +247,7 @@ final class ChatbotService
         $monthStart = now()->startOfMonth();
 
         $totalInput = ChatbotMessage::where('created_at', '>=', $monthStart)
-            ->where('role', 'user')
+            ->where('role', 'assistant')
             ->sum('tokens_in');
 
         $totalOutput = ChatbotMessage::where('created_at', '>=', $monthStart)
@@ -258,23 +281,26 @@ final class ChatbotService
         string $faqContext,
         iterable $faqs,
         string $locale,
+        bool $triageAbandoned = false,
     ): ChatbotResponse {
         $systemPrompt = $this->buildSystemPrompt($locale);
+        if ($triageAbandoned) {
+            $systemPrompt .= self::TRIAGE_ABANDON_PROMPT_SUFFIX;
+        }
         $llmMessages = $this->buildLlmMessages($history, $userMessage, $faqContext);
 
         try {
-            $request = new LlmRequest(
-                system: $systemPrompt,
-                messages: $llmMessages,
-                responseFormat: 'json_object',
+            [$parsed, $llmResponse] = $this->generateWithRetry(
+                systemPrompt: $systemPrompt,
+                llmMessages: $llmMessages,
+                locale: $locale,
+                conversationId: $conversation->id,
+                maxTokens: 800,
+                temperature: 0.3,
+                isRegeneration: false,
             );
 
-            $llmResponse = $this->llm->complete($request);
-
-            $parsed = $this->parser->parse($llmResponse->content, $locale, (string) $conversation->id);
-
             $allowedAmounts = $this->filter->getAllowedAmounts();
-            $cleaned = $this->filter->clean($parsed->answer, $allowedAmounts);
             $violations = $this->filter->violationCount($parsed->answer, $locale, $allowedAmounts);
 
             if ($violations >= 2) {
@@ -282,6 +308,7 @@ final class ChatbotService
                     'conversation_id' => $conversation->id,
                 ]);
 
+                $cleaned = $this->filter->clean($parsed->answer, $allowedAmounts);
                 $parsed = new ChatbotResponse(
                     answer: $cleaned."\n\n".__('chatbot.escalation_suggestion', [], $locale),
                     escalate: true,
@@ -297,56 +324,100 @@ final class ChatbotService
                     'conversation_id' => $conversation->id,
                 ]);
 
-                $stricterPrompt = $this->buildStricterPrompt($locale);
-                $stricterRequest = new LlmRequest(
-                    system: $stricterPrompt,
-                    messages: $llmMessages,
+                [$parsed, $llmResponse] = $this->generateWithRetry(
+                    systemPrompt: $this->buildStricterPrompt($locale),
+                    llmMessages: $llmMessages,
+                    locale: $locale,
+                    conversationId: $conversation->id,
                     maxTokens: 400,
                     temperature: 0.2,
-                    responseFormat: 'json_object',
+                    isRegeneration: true,
                 );
 
-                $regenerated = $this->llm->complete($stricterRequest);
-                $reParsed = $this->parser->parse($regenerated->content, $locale, (string) $conversation->id);
-                $reViolations = $this->filter->violationCount($reParsed->answer, $locale, $allowedAmounts);
+                $reViolations = $this->filter->violationCount($parsed->answer, $locale, $allowedAmounts);
 
                 if ($reViolations > 0) {
-                    $cleaned = $this->filter->clean($reParsed->answer, $allowedAmounts);
-
+                    $cleaned = $this->filter->clean($parsed->answer, $allowedAmounts);
                     $parsed = new ChatbotResponse(
                         answer: $cleaned."\n\n".__('chatbot.escalation_suggestion', [], $locale),
                         escalate: true,
                     );
 
-                    $this->recordMessage($conversation, 'assistant', $parsed->answer, $faqs->pluck('id')->toArray(), $regenerated);
+                    $this->recordMessage($conversation, 'assistant', $parsed->answer, $faqs->pluck('id')->toArray(), $llmResponse);
 
                     return $parsed;
                 }
+            }
 
-                $parsed = $reParsed;
-                $llmResponse = $regenerated;
+            // Apply chip filter for anti-redundancy
+            $priorUserMessages = $this->getPriorUserMessages($conversation);
+            $priorSuggestions = $this->getPriorSuggestions($conversation);
+            $recentAnswers = $this->getRecentAssistantAnswers($conversation);
+
+            $filteredSuggestions = $this->chipFilter->filter(
+                suggestions: $parsed->suggestions,
+                priorUserMessages: $priorUserMessages,
+                priorSuggestions: $priorSuggestions,
+                recentAssistantAnswers: $recentAnswers,
+                locale: $locale,
+            );
+
+            // Apply repetition guard
+            $recentAssistantAnswers = $this->getRecentAssistantAnswers($conversation, 3);
+            $repetitionVerdict = $this->repetitionGuard->check($parsed->answer, $recentAssistantAnswers);
+
+            $regenerationAttempts = 0;
+            while ($repetitionVerdict === RepetitionVerdict::REGENERATE && $regenerationAttempts < 2) {
+                $regenerationAttempts++;
+                Log::info('Chatbot repetition guard: regenerating', [
+                    'conversation_id' => $conversation->id,
+                    'attempt' => $regenerationAttempts,
+                ]);
+
+                $stricterSystemPrompt = $this->buildStricterPrompt($locale);
+
+                [$parsed, $llmResponse] = $this->generateWithRetry(
+                    systemPrompt: $stricterSystemPrompt,
+                    llmMessages: $llmMessages,
+                    locale: $locale,
+                    conversationId: $conversation->id,
+                    maxTokens: 400,
+                    temperature: 0.2,
+                    isRegeneration: true,
+                );
+
+                $repetitionVerdict = $this->repetitionGuard->check($parsed->answer, $recentAssistantAnswers);
+            }
+
+            if ($repetitionVerdict === RepetitionVerdict::FALLBACK || ($regenerationAttempts >= 2 && $repetitionVerdict === RepetitionVerdict::REGENERATE)) {
+                Log::warning('Chatbot repetition guard: fallback activated', [
+                    'conversation_id' => $conversation->id,
+                ]);
+
+                $parsed = new ChatbotResponse(
+                    answer: __('chatbot.repetition_fallback', [], $locale),
+                    suggestions: [],
+                    recommendedPlan: null,
+                    escalate: true,
+                );
+            } else {
+                $parsed = new ChatbotResponse(
+                    answer: $parsed->answer,
+                    suggestions: $filteredSuggestions,
+                    recommendedPlan: $parsed->recommendedPlan,
+                    escalate: $parsed->escalate,
+                    outOfScope: $parsed->outOfScope,
+                );
             }
 
             if ($parsed->outOfScope) {
                 $conversation->intent_resolved = 'out_of_scope';
             }
 
-            $planCard = null;
             if ($parsed->recommendedPlan !== null) {
                 $plan = ConsultationPlan::where('slug', $parsed->recommendedPlan->slug)->first();
 
                 if ($plan) {
-                    $planCard = [
-                        'id' => $plan->id,
-                        'slug' => $plan->slug,
-                        'name' => $plan->name_translations[$locale] ?? $plan->slug,
-                        'price_centimes' => $plan->price_centimes,
-                        'duration_minutes' => $plan->duration_minutes,
-                        'format' => $plan->format,
-                        'reason' => $parsed->recommendedPlan->reason,
-                        'booking_url' => $parsed->recommendedPlan->toBookingUrl($locale),
-                    ];
-
                     $conversation->intent_resolved = 'booked';
                 }
             }
@@ -374,26 +445,45 @@ final class ChatbotService
             return ChatbotResponse::fallback($locale);
         }
 
-        return new ChatbotResponse(
-            answer: $parsed->answer,
-            suggestions: $parsed->suggestions,
-            recommendedPlan: $parsed->recommendedPlan,
-            escalate: $parsed->escalate,
-            outOfScope: $parsed->outOfScope,
+        return $parsed;
+    }
+
+    private function generateWithRetry(
+        string $systemPrompt,
+        array $llmMessages,
+        string $locale,
+        int $conversationId,
+        int $maxTokens = 800,
+        float $temperature = 0.3,
+        bool $isRegeneration = false,
+    ): array {
+        $request = new LlmRequest(
+            system: $systemPrompt,
+            messages: $llmMessages,
+            maxTokens: $maxTokens,
+            temperature: $temperature,
+            responseFormat: 'json_object',
         );
+
+        $llmResponse = $this->llm->complete($request);
+        $parsed = $this->parser->parse($llmResponse->content, $locale, (string) $conversationId);
+
+        return [$parsed, $llmResponse];
     }
 
     private function retrieveFaqs(string $query, string $locale): iterable
     {
         return Faq::where('is_published', true)
-            ->where("question_translations->{$locale}", 'like', '%'.$query.'%')
-            ->orWhere("answer_translations->{$locale}", 'like', '%'.$query.'%')
+            ->where(function ($q) use ($locale, $query) {
+                $q->where("question_translations->{$locale}", 'like', '%'.$query.'%')
+                    ->orWhere("answer_translations->{$locale}", 'like', '%'.$query.'%');
+            })
             ->orderBy('display_order')
             ->limit(5)
             ->get();
     }
 
-    private function buildFaqContext(iterable $faqs): string
+    private function buildFaqContext(iterable $faqs, string $locale): string
     {
         $lines = [];
 
@@ -406,15 +496,15 @@ final class ChatbotService
                 ? json_decode($faq->answer_translations, true)
                 : $faq->answer_translations;
 
-            $question = is_array($translations) ? ($translations[app()->getLocale()] ?? '') : '';
-            $answer = is_array($answerTranslations) ? ($answerTranslations[app()->getLocale()] ?? '') : '';
+            $question = is_array($translations) ? ($translations[$locale] ?? '') : '';
+            $answer = is_array($answerTranslations) ? ($answerTranslations[$locale] ?? '') : '';
 
             if ($question && $answer) {
                 $lines[] = "Q: {$question}\nA: {$answer}";
             }
         }
 
-        return $lines ? "\n\n<contexte FAQ>\n".implode("\n\n", $lines)."\n</contexte>" : '';
+        return $lines ? "\n\n<context>\n".implode("\n\n", $lines)."\n</context>" : '';
     }
 
     private function buildLlmMessages(array $history, string $userMessage, string $faqContext): array
@@ -440,21 +530,7 @@ final class ChatbotService
 
     private function buildSystemPrompt(string $locale): string
     {
-        $base = __(self::SYSTEM_PROMPT_KEY, [], $locale);
-
-        $examples = config('chatbot.few_shot_examples', []);
-
-        if (empty($examples)) {
-            return $base;
-        }
-
-        $parts = [$base, "\n\nEXEMPLES DE RÉPONSES :"];
-
-        foreach ($examples as $label => $example) {
-            $parts[] = "\n--- {$label} ---\nUtilisateur : {$example['user']}\nAssistant : {$example['assistant']}";
-        }
-
-        return implode("\n", $parts);
+        return __(self::SYSTEM_PROMPT_KEY, [], $locale);
     }
 
     private function buildStricterPrompt(string $locale): string
@@ -464,18 +540,74 @@ final class ChatbotService
 
     private function getConversationHistory(ChatbotConversation $conversation): array
     {
-        return ChatbotMessage::where('conversation_id', $conversation->id)
+        $messages = ChatbotMessage::where('conversation_id', $conversation->id)
             ->orderBy('created_at')
-            ->latest()
-            ->take(self::HISTORY_LIMIT)
-            ->get()
-            ->reverse()
-            ->map(fn (ChatbotMessage $msg) => [
+            ->get();
+
+        $history = [];
+        $tokenCount = 0;
+
+        foreach ($messages->reverse() as $msg) {
+            $tokens = $this->llm->countTokens($msg->content);
+            if ($tokenCount + $tokens > self::HISTORY_TOKEN_BUDGET) {
+                break;
+            }
+            $history[] = [
                 'role' => $msg->role,
                 'content' => $msg->content,
-            ])
-            ->values()
+            ];
+            $tokenCount += $tokens;
+        }
+
+        // Remove the most recent message (current user turn) — it will be
+        // appended last by buildLlmMessages() with the FAQ context block.
+        if (! empty($history)) {
+            array_shift($history);
+        }
+
+        return array_reverse($history);
+    }
+
+    private function getPriorUserMessages(ChatbotConversation $conversation): array
+    {
+        return ChatbotMessage::where('conversation_id', $conversation->id)
+            ->where('role', 'user')
+            ->orderBy('created_at')
+            ->pluck('content')
             ->toArray();
+    }
+
+    private function getPriorSuggestions(ChatbotConversation $conversation): array
+    {
+        return ChatbotMessage::where('conversation_id', $conversation->id)
+            ->where('role', 'assistant')
+            ->orderBy('created_at')
+            ->pluck('content')
+            ->toArray();
+    }
+
+    private function getRecentAssistantAnswers(ChatbotConversation $conversation, int $count = 3): array
+    {
+        return ChatbotMessage::where('conversation_id', $conversation->id)
+            ->where('role', 'assistant')
+            ->orderBy('created_at', 'desc')
+            ->take($count)
+            ->pluck('content')
+            ->toArray();
+    }
+
+    private function translateChipLabel(string $value, string $locale): string
+    {
+        $categoryKey = 'chatbot.category_'.$value;
+        if (Lang::has($categoryKey, $locale)) {
+            return __($categoryKey, [], $locale);
+        }
+        $triageKey = 'chatbot.triage_'.$value;
+        if (Lang::has($triageKey, $locale)) {
+            return __($triageKey, [], $locale);
+        }
+
+        return $value;
     }
 
     private function recordMessage(
@@ -500,27 +632,10 @@ final class ChatbotService
     private function triageSuggestions(string $step, string $locale): array
     {
         return match ($step) {
-            'category' => [
-                __('chatbot.category_family', [], $locale),
-                __('chatbot.category_real_estate', [], $locale),
-                __('chatbot.category_financial', [], $locale),
-                __('chatbot.category_contracts', [], $locale),
-                __('chatbot.category_other', [], $locale),
-            ],
-            'has_documents' => [
-                __('chatbot.triage_yes', [], $locale),
-                __('chatbot.triage_no', [], $locale),
-            ],
-            'format' => [
-                __('chatbot.triage_in_person', [], $locale),
-                __('chatbot.triage_video', [], $locale),
-                __('chatbot.triage_indifferent', [], $locale),
-            ],
-            'urgency' => [
-                __('chatbot.triage_this_week', [], $locale),
-                __('chatbot.triage_this_month', [], $locale),
-                __('chatbot.triage_flexible', [], $locale),
-            ],
+            'category' => ['family', 'real_estate', 'financial', 'contracts', 'other'],
+            'has_documents' => ['yes', 'no'],
+            'format' => ['in_person', 'video', 'indifferent'],
+            'urgency' => ['this_week', 'this_month', 'flexible'],
             default => [],
         };
     }
