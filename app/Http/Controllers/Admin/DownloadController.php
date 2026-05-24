@@ -26,8 +26,8 @@ class DownloadController extends Controller
     {
         $this->authorize('view', $document);
 
-        if ($document->scan_status === 'infected') {
-            abort(403, __('portal.document_infected'));
+        if ($document->scan_status !== 'clean') {
+            abort(403, $document->scan_status === 'pending' ? __('portal.scanning') : __('portal.document_infected'));
         }
 
         if (! Storage::exists($document->storage_path)) {
