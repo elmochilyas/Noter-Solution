@@ -46,9 +46,11 @@ class ConsultationPlanResource extends Resource
                             ->numeric()
                             ->required(),
                         TextInput::make('price_centimes')
-                            ->label('Prix (centimes)')
+                            ->label('Prix (MAD)')
                             ->numeric()
-                            ->required(),
+                            ->required()
+                            ->formatStateUsing(fn (?int $state) => $state ? number_format($state / 100, 2, ',', '') : '0')
+                            ->mutateDehydrate(fn (?string $state): int => (int) round(((float) str_replace(',', '.', $state ?? '0')) * 100)),
                         Select::make('format')
                             ->options([
                                 'video' => 'En ligne',

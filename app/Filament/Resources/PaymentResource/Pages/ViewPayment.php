@@ -29,10 +29,12 @@ class ViewPayment extends ViewRecord
                 ->visible(fn (Payment $record) => $record->status === 'succeeded')
                 ->form([
                     TextInput::make('amount_centimes')
-                        ->label('Montant (centimes)')
+                        ->label('Montant (MAD)')
                         ->numeric()
                         ->required()
-                        ->default(fn (Payment $record) => $record->amount_centimes),
+                        ->default(fn (Payment $record) => $record->amount_centimes)
+                        ->formatStateUsing(fn (?int $state) => $state ? number_format($state / 100, 2, ',', '') : '0')
+                        ->mutateDehydrate(fn (?string $state): int => (int) round(((float) str_replace(',', '.', $state ?? '0')) * 100)),
                     TextInput::make('reason')
                         ->label('Motif')
                         ->required()
