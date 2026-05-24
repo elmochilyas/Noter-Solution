@@ -13,6 +13,7 @@ return [
     'nav_book_appointment' => 'Prendre rendez-vous',
     'next_booking' => 'Prochain rendez-vous',
     'view' => 'Voir',
+    'open' => 'Ouvrir',
     'see_all_bookings' => 'Voir tous les rendez-vous',
     'download_receipts' => 'Consulter mes reçus',
     'manage_preferences' => 'Gérer mes préférences',

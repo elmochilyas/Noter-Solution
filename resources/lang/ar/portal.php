@@ -13,6 +13,7 @@ return [
     'nav_book_appointment' => 'حجز موعد',
     'next_booking' => 'الموعد القادم',
     'view' => 'عرض',
+    'open' => 'فتح',
     'see_all_bookings' => 'عرض كل المواعيد',
     'download_receipts' => 'الاطلاع على الوصلات',
     'manage_preferences' => 'إدارة التفضيلات',

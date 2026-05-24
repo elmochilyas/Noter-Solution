@@ -99,7 +99,7 @@
                     <p class="text-sm text-stone-500 mt-0.5">{{ __($card['sub']) }}</p>
                 </div>
                 <div class="mt-auto flex items-center justify-center gap-1 text-xs font-semibold text-brass-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    Ouvrir
+                    {{ __('portal.open') }}
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 rtl:scale-x-[-1]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                     </svg>

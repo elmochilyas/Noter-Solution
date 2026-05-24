@@ -125,6 +125,14 @@ test('authenticated client sees dashboard', function () {
         ->assertSee(__('portal.dashboard_title'));
 });
 
+test('dashboard shows translated open text in Arabic', function () {
+    $client = Client::factory()->create(['preferred_locale' => 'ar']);
+
+    $this->actingAs($client, 'client')
+        ->get('/ar/portal/dashboard')
+        ->assertDontSee('Ouvrir');
+});
+
 test('guest cannot access dashboard', function () {
     $this->get('/fr/portal/dashboard')
         ->assertRedirect();
