@@ -21,8 +21,10 @@ class DownloadController extends Controller
             abort(403);
         }
 
-        if ($document->scan_status === 'infected') {
-            abort(403, __('portal.document_infected'));
+        if ($document->scan_status === 'infected' || $document->scan_status === 'pending') {
+            abort(403, $document->scan_status === 'infected'
+                ? __('portal.document_infected')
+                : __('portal.scanning'));
         }
 
         if (! Storage::exists($document->storage_path)) {
