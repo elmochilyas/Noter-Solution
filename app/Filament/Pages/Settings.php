@@ -122,6 +122,8 @@ class Settings extends Page
 
     public function save(): void
     {
+        $this->authorize('update', Setting::class);
+
         $state = $this->form->getState();
 
         Setting::set('practice_info', $state['practice_info'] ?? []);
