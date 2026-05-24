@@ -29,12 +29,11 @@ class BookingController extends Controller
             ->where('reference', $reference)
             ->firstOrFail();
 
-        $canCancel = $booking->starts_at->isAfter(now()->addHours(2))
-            && in_array($booking->status, ['pending_payment', 'confirmed']);
+        $canCancel = $client->can('cancel', $booking);
 
-        $canReschedule = $canCancel
+        $canReschedule = $booking->status === 'confirmed'
             && ! $client->hasExceededRescheduleLimit()
-            && $booking->status === 'confirmed';
+            && $canCancel;
 
         $showJoinLink = $booking->format === 'online'
             && $booking->status === 'confirmed'

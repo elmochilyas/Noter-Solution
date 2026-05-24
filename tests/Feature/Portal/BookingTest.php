@@ -54,3 +54,31 @@ test('client cannot view another clients booking', function () {
 test('guest cannot access bookings', function () {
     $this->get('/fr/portal/bookings')->assertRedirect();
 });
+
+test('booking detail shows cancel button for eligible booking', function () {
+    $booking = Booking::factory()->create([
+        'client_id' => $this->client->id,
+        'consultation_plan_id' => $this->plan->id,
+        'starts_at' => now()->addHours(3),
+        'status' => 'confirmed',
+    ]);
+
+    $this->actingAs($this->client, 'client')
+        ->get("/fr/portal/bookings/{$booking->reference}")
+        ->assertStatus(200)
+        ->assertSee(__('portal.cancel_booking'));
+});
+
+test('booking detail hides cancel button for ineligible booking', function () {
+    $booking = Booking::factory()->create([
+        'client_id' => $this->client->id,
+        'consultation_plan_id' => $this->plan->id,
+        'starts_at' => now()->addHour(),
+        'status' => 'confirmed',
+    ]);
+
+    $this->actingAs($this->client, 'client')
+        ->get("/fr/portal/bookings/{$booking->reference}")
+        ->assertStatus(200)
+        ->assertDontSee(__('portal.cancel_booking'));
+});
