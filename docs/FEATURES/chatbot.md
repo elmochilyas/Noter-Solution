@@ -230,13 +230,17 @@ All failures logged.
 
 ## Quick replies
 
-After each assistant message, the bot renders **dynamic suggestion chips** populated from the LLM's `suggestions` field. The LLM generates 2–4 contextually relevant follow-up questions per turn.
+After each assistant message, the bot renders **dynamic suggestion chips** populated from the LLM's `suggestions` field. The LLM generates 2–4 contextually relevant follow-up questions per turn. Chips are then filtered server-side by `ChipFilter` for anti-redundancy:
+
+- Chips phrased from the bot's perspective (second person) are dropped.
+- Chips shorter than 3 words or longer than 10 words are dropped.
+- Chips matching any prior user message or prior suggestion in the conversation are dropped.
+- Chips whose answer is substantially present in the bot's last 3 turns are dropped.
+- If fewer than 2 chips remain after filtering, chips are dropped entirely for that turn (better silent than redundant).
 
 Selecting a chip sends it as the user's next message.
 
-The **seed greeting** (first message) uses a fixed set of chips from config (`chatbot.suggestion_*` in lang files). These are the only static chips in the system — all subsequent turns use dynamically generated chips.
-
-If the LLM returns an empty `suggestions` array, no chips are rendered. There is no mid-conversation fallback to the default set.
+The **seed greeting** (first message) uses a fixed set of chips from config (`chatbot.greeting_chips` in config). These are the only static chips in the system — all subsequent turns use dynamically generated and filtered chips.
 
 ### Plan recommendation card
 
@@ -265,6 +269,8 @@ Sana sees in Filament:
 - [ ] Disclaimer modal appears on first session, not subsequent ones
 - [ ] User can send a message and see a structured response (answer text + optional plan card + dynamic chips)
 - [ ] Dynamic suggestion chips change across turns (compare 3 consecutive messages — chip sets must differ)
+- [ ] Chips do NOT repeat prior user questions or prior suggestions (anti-redundancy)
+- [ ] Chips are NOT phrased from the bot's perspective (no "Quel est votre..." type chips)
 - [ ] Plan recommendation card renders with name, price, duration, format icon, reason, "Réserver" button
 - [ ] "Réserver" button deep-links to `/{locale}/book?plan={slug}&category={cat}&format={fmt}`
 - [ ] Triage flow triggered by booking-intent
@@ -281,6 +287,9 @@ Sana sees in Filament:
 - [ ] Mid-conversation language switch handled
 - [ ] Conversations anonymized on client deletion
 - [ ] No PII in LLM prompt — system prompt explicit, user identity not passed
+- [ ] Bot does NOT repeat itself across consecutive turns (repetition guard)
+- [ ] Bot adapts response form to question type (pricing ≠ recommendation ≠ documents ≠ booking)
+- [ ] Bot reads conversation history and maintains context (e.g., "et si c'est un héritage" resolved correctly)
 - [ ] Accessibility: keyboard nav, screen reader, contrast, Lighthouse Accessibility = 100
 - [ ] Reduced motion respected
 - [ ] RTL verified on `/ar/` — card anatomy mirrors correctly, button aligns to end

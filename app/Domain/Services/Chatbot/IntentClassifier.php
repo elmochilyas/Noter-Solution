@@ -129,7 +129,10 @@ final class IntentClassifier
 
     private function containsWord(string $haystack, string $needle): bool
     {
-        return str_contains($haystack, $needle)
-            || preg_match('/\b'.preg_quote($needle, '/').'/u', $haystack) === 1;
+        if (str_contains($needle, ' ')) {
+            return str_contains($haystack, $needle);
+        }
+
+        return preg_match('/\b'.preg_quote($needle, '/').'/u', $haystack) === 1;
     }
 }

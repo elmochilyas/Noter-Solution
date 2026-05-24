@@ -150,14 +150,6 @@ final class ChatbotResponseParser
 
             $trimmed = trim($suggestion);
 
-            if ($this->isReverseDirection($trimmed)) {
-                Log::info('Chatbot suggestion dropped (reverse direction)', [
-                    'suggestion' => $trimmed,
-                ]);
-
-                continue;
-            }
-
             $result[] = $trimmed;
 
             if (count($result) >= 4) {
@@ -166,50 +158,6 @@ final class ChatbotResponseParser
         }
 
         return $result;
-    }
-
-    /**
-     * Detect suggestions phrased from the bot's perspective (second person)
-     * rather than the user's perspective (first person).
-     */
-    private function isReverseDirection(string $suggestion): bool
-    {
-        // French second-person patterns (bot asking user)
-        $frPatterns = [
-            '/^Avez-vous\b/i',
-            '/^Quel\s+(est\s+)?(votre|ton)\b/i',
-            '/^Quelle\s+(est\s+)?(votre|ton)\b/i',
-            '/^Quels\s+(sont\s+)?(vos|tes)\b/i',
-            '/^Quelles\s+(sont\s+)?(vos|tes)\b/i',
-            '/^Quand\s+(souhaitez|voulez|pouvez)-vous\b/i',
-            '/^Que\s+(voulez|souhaitez|cherchez)-vous\b/i',
-            '/^Comment\s+(puis-je|pourrais-je)\s+vous\b/i',
-            '/\b(vous|tu)\s+(souhaitez|voulez|cherchez|avez besoin|êtes)/i',
-            '/^Parlez-moi\b/i',
-            '/^Dites-moi\b/i',
-        ];
-
-        foreach ($frPatterns as $pattern) {
-            if (preg_match($pattern, $suggestion)) {
-                return true;
-            }
-        }
-
-        // Arabic second-person patterns (bot asking user)
-        $arPatterns = [
-            '/^(هل\s+)?(لديك|عندك|تريد|تبحث|تحتاج)\b/u',
-            '/^(ما\s+)?(هو|هي)\s+(الموضوع|المجال|السبب)\b/u',
-            '/\b(تريد|تبحث|تحتاج|ترغب)\s+(أن|في)\b/u',
-            '/^(كم\s+)?(تريد|تود)\s+أن\b/u',
-        ];
-
-        foreach ($arPatterns as $pattern) {
-            if (preg_match($pattern, $suggestion)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function parseRecommendedPlan(?array $data): ?PlanRecommendation

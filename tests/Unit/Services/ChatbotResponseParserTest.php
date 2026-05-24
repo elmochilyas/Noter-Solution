@@ -86,7 +86,7 @@ test('limits suggestions to 4', function () {
     expect($response->suggestions)->toHaveCount(4);
 });
 
-test('filters out reverse-direction French suggestions', function () {
+test('parses all suggestions including reverse-direction (filtering moved to ChipFilter)', function () {
     $json = '{"answer": "Test.", "suggestions": [
         "Combien coûte une consultation ?",
         "Quel est votre problème ?",
@@ -95,15 +95,14 @@ test('filters out reverse-direction French suggestions', function () {
     ]}';
     $response = $this->parser->parse($json);
 
-    expect($response->suggestions)->toBe([
-        'Combien coûte une consultation ?',
-        'Quels documents sont nécessaires ?',
-    ]);
-    expect($response->suggestions)->not->toContain('Quel est votre problème ?');
-    expect($response->suggestions)->not->toContain('Avez-vous déjà pris rendez-vous ?');
+    expect($response->suggestions)->toHaveCount(4);
+    expect($response->suggestions)->toContain('Combien coûte une consultation ?');
+    expect($response->suggestions)->toContain('Quel est votre problème ?');
+    expect($response->suggestions)->toContain('Avez-vous déjà pris rendez-vous ?');
+    expect($response->suggestions)->toContain('Quels documents sont nécessaires ?');
 });
 
-test('filters out reverse-direction Arabic suggestions', function () {
+test('parses all Arabic suggestions including reverse-direction (filtering moved to ChipFilter)', function () {
     $json = '{"answer": "Test.", "suggestions": [
         "كم ثمن الاستشارة ؟",
         "هل لديك وثائق الطلاق؟",
@@ -111,11 +110,10 @@ test('filters out reverse-direction Arabic suggestions', function () {
     ]}';
     $response = $this->parser->parse($json);
 
-    expect($response->suggestions)->toBe([
-        'كم ثمن الاستشارة ؟',
-    ]);
-    expect($response->suggestions)->not->toContain('هل لديك وثائق الطلاق؟');
-    expect($response->suggestions)->not->toContain('ما هو الموضوع الذي يهمك؟');
+    expect($response->suggestions)->toHaveCount(3);
+    expect($response->suggestions)->toContain('كم ثمن الاستشارة ؟');
+    expect($response->suggestions)->toContain('هل لديك وثائق الطلاق؟');
+    expect($response->suggestions)->toContain('ما هو الموضوع الذي يهمك؟');
 });
 
 test('parses recommended plan', function () {

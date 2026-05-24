@@ -101,6 +101,7 @@ final class OutputFilter
     {
         return ConsultationPlan::where('is_active', true)
             ->pluck('price_centimes')
+            ->filter()
             ->unique()
             ->values()
             ->toArray();

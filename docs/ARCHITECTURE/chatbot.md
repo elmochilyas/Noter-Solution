@@ -39,7 +39,7 @@ User message → Pre-processing → Intent classification → Branch
 ## Components
 
 | Component | Class | Responsibility |
-|---|---|---|---|
+|---|---|---|---|---|
 | Conversation manager | `ChatbotService` | Orchestrates everything |
 | Intent classifier | `IntentClassifier` | First-pass categorization |
 | FAQ retriever | `FaqRetriever` | Keyword search over FAQ translations |
@@ -47,6 +47,8 @@ User message → Pre-processing → Intent classification → Branch
 | Triage flow | `TriageFlow` | Multi-step Q&A to recommend a plan |
 | Escalation handler | `EscalationHandler` | Generates WhatsApp deep-link + notifies admin |
 | Output filter | `OutputFilter` | Post-generation regex check for forbidden patterns |
+| Chip filter | `ChipFilter` | Server-side anti-redundancy rules for suggestion chips |
+| Repetition guard | `RepetitionGuard` | Detects and regenerates responses similar to recent turns |
 | Conversation logger | `ChatbotMessage` model (inline) | Persists messages synchronously |
 
 ## Conversation persistence
@@ -143,51 +145,88 @@ class FaqRetriever
 
 The system prompt is the most important piece. Maintained in `resources/lang/{locale}/chatbot.php` so it's translatable and editable from Filament.
 
-Key elements:
-- Identity: "You are the assistant for Maître Sana Bouhamidi's notary practice in Agadir."
-- Scope: "Only answer questions about notarial services in Morocco."
-- Tone: formal, calm, professional.
-- Languages: respond in the same language as the user.
-- Format: return a JSON object matching the structured response schema (see above). The `answer` field may contain light Markdown (**bold**, line breaks, bullet lists).
-- Guardrails:
-  - Never give legal advice — only general information.
-  - Never quote fees in the `answer` text. Plan prices are inserted by the application from the database.
-  - Never include a `recommended_plan` unless the user has expressed concrete booking intent.
-  - Recommend booking a consultation for specific cases.
-  - Recommend WhatsApp / phone for urgent matters.
-- Populate `suggestions` dynamically based on the conversation flow — not from a fixed list.
-- Forbid superlative / comparative claims in any field.
-- Disclaimer line appended to every substantive answer.
+The prompt is structured in 8 ordered sections:
+1. **Identity** — one sentence: who the assistant is and whose practice it represents.
+2. **Scope** (positive) — what the assistant DOES (inform, explain, present pricing, recommend, answer FAQ).
+3. **Out of scope** (negative) — what it refrains from (act fees, legal advice, off-domain topics, drafting, outcome promises).
+4. **Tone** — calm, factual, respectful. No exclamation marks, no emoji except 📞✉️ for contacts. No marketing language. No superlatives.
+5. **Conversation principles** — the strategic heart: read history, match question shape (different answer forms for different intents), be brief, don't repeat across turns.
+6. **Response schema** — explicit field-by-field JSON rules with length limits, formatting, and when to populate `recommended_plan`.
+7. **Few-shot examples** — 8 multi-turn conversation examples embedded directly in the prompt.
+8. **Guardrails** — JSON-only output, currency format, language rules.
 
 ### Message structure sent to Cerebras
 
 ```json
 {
   "model": "gpt-oss-120b",
-  "max_completion_tokens": 600,
+  "max_completion_tokens": 800,
   "temperature": 0.3,
   "response_format": { "type": "json_object" },
   "messages": [
     { "role": "system", "content": "<system prompt for resolved locale>" },
-    { "role": "user", "content": "Quels documents pour un divorce ?" },
-    { "role": "assistant", "content": "<structured response JSON from previous turn>" },
+    { "role": "user", "content": "<prior user turn 1>" },
+    { "role": "assistant", "content": "<prior assistant turn 1>" },
+    { "role": "user", "content": "<prior user turn 2>" },
+    { "role": "assistant", "content": "<prior assistant turn 2>" },
+    { "role": "user", "content": "<prior user turn 3>" },
+    { "role": "assistant", "content": "<prior assistant turn 3>" },
     {
       "role": "user",
-      "content": "Combien de temps ça prend ?\n\n<context from retrieved FAQ entries — clearly labeled>"
+      "content": "<current user message>\n\n<context>Retrieved FAQ entries (question + answer)</context>"
     }
   ]
 }
 ```
 
-The retrieved FAQ context is appended to the user message as a context block, not as a separate role.
+The retrieved FAQ context is appended to the user message as a `<context>` block, not as a separate role.
+
+The conversation history array (**`$history`** in `getConversationHistory()`) excludes the current user message — it contains only turns prior to the current one. The current message is appended last by `buildLlmMessages()`, so it appears exactly once in the request array.
+
+Assistant turn content in history is the plain text `.answer` field of the stored `ChatbotMessage`, not the full JSON response envelope or the LLM's raw JSON output. This prevents the model from seeing its own structured JSON in prior turns.
 
 ### Token budget
 
-- System prompt: ~600 tokens.
-- Retrieved context: up to 5 FAQ entries, ~1000 tokens total.
-- Conversation history: last 6 messages, ~800 tokens.
-- Response: max 600 tokens.
-- Per call ceiling: ~3000 tokens.
+| Component | Target tokens | Notes |
+|---|---|---|
+| System prompt | 1000–1200 | Structured sections + 8 multi-turn few-shot examples |
+| FAQ context | Up to 800 | Up to 5 FAQ entries, truncated to fit |
+| Conversation history | ~1500 | Token-budgeted (not turn-counted). Accumulates from most recent backwards until 1500 tokens reached. |
+| Response (`max_completion_tokens`) | 800 | ~200 for JSON structure + ~600 for answer |
+| **Per-call ceiling** | **~4300** | Well within Cerebras 131K window |
+
+### History budget algorithm
+
+The conversation history is built by walking messages from most recent backwards, accumulating tokens until the 1500-token budget is exhausted.
+
+1. All messages for the conversation are loaded from `chatbot_messages`, ordered chronologically by `created_at`.
+2. Messages are iterated in reverse (most recent first), accumulating token count via `LlmmClient::countTokens()` (character count / 4 approximation).
+3. Once the accumulated token count exceeds `HISTORY_TOKEN_BUDGET` (1500), older messages are dropped.
+4. The most recent message (the current user turn, just recorded by `recordMessage()`) is removed from the history array — it will be appended last by `buildLlmMessages()` with the FAQ `<context>` block.
+5. The remaining messages are reversed back to chronological order.
+
+This ensures the current user message appears exactly once in the final request array, and that the token budget limits total history length (not turn count). Assistant content in history is the `.answer` text only, never the raw JSON response.
+
+### Chip filter (ChipFilter)
+
+Server-side post-generation filter that enforces suggestion chip relevance and anti-redundancy:
+
+Rules applied in order:
+1. **Reverse-direction check** — drops chips phrased from the bot's perspective (second person). Patterns for FR and AR.
+2. **Length gate** — rejects < 3 words or > 10 words.
+3. **Prior-user-message check** — rejects chips matching any prior user message in the conversation.
+4. **Prior-suggestion check** — rejects chips matching any prior assistant suggestion.
+5. **Recency check** — rejects chips whose answer is substantially present in the bot's last 3 turns (checked via keyword overlap).
+6. **Diversity** — caps at 4 chips, logs high rejection rates (>50%) to Sentry.
+
+### Repetition guard (RepetitionGuard)
+
+Detects when the LLM produces an answer too similar to recent turns:
+
+- Computes character-level 3-gram (shingle) similarity between the new answer and each of the previous 3 assistant answers.
+- Threshold: > 0.7 similarity → `REGENERATE`.
+- Regeneration uses the stricter prompt with an anti-repetition suffix.
+- After 2 failed attempts → `FALLBACK` with a meta-response: "Pouvez-vous préciser ce que vous souhaitez savoir ?"
 
 ### Structured response schema
 
@@ -211,12 +250,13 @@ The LLM is instructed to return a JSON object matching this contract:
 ```
 
 Rules:
-- `answer` is the only required field. Others are optional.
-- `recommended_plan` must be `null` unless the user has expressed concrete booking intent or is asking about pricing/process for a specific matter.
-- `escalate: true` only when the user explicitly asks for a human or the bot's confidence is very low.
-- `out_of_scope: true` when the question is outside notarial services in Morocco.
-- Never include a price/amount in `answer` or `reason` — prices come from the plan card.
-- Suggestions must be questions the user might ask next, given the current answer.
+- `answer` (required): 2–4 sentences, max ~100 words. Light Markdown: **bold**, line breaks, bullet lists (-). No headings, no hyperlinks. No act fees. No superlatives. No promises.
+- `suggestions` (optional, 2–4 items): Short questions (3–10 words) the USER would ask next. First person. Must NOT: duplicate prior user questions, duplicate prior suggestions, be answerable from the bot's last 3 turns, or be generic ("En savoir plus").
+- `recommended_plan`: populate when user asks about pricing, plan selection, or shows booking intent. Default: `standard-online` unless user expresses in-office preference (`in-office`) or complex need (`extended`). `null` for general questions.
+- `escalate: true` — only when the user explicitly asks to speak to a human.
+- `out_of_scope: true` — only when the question is outside notarial services in Morocco.
+- Consultation prices may be quoted in `answer` (0/250/400/800 MAD). Authentication act fees are NEVER quoted.
+- Suggestions are additionally filtered server-side by ChipFilter (see above).
 
 ### Response handling
 - The UI shows a typing indicator (three brass dots with staggered `animate-pulse` delays) during the round-trip (typically ~600ms–2s on Cerebras).
@@ -261,7 +301,11 @@ Recommendation card:
 
 Implemented as a structured state machine in `TriageFlow`. State persisted in the conversation row's `metadata` JSON column.
 
-The user can break out of the triage at any time by typing free text — that returns to general Q&A.
+**Chip click routing:** When triage is active, chip clicks are handled directly by `ChatbotService::handleTriageChipClick()`, which bypasses the `respondTo()` pipeline entirely. The LLM is never called for chip clicks during active triage. The chip click goes directly to `TriageFlow::processStep()`, which advances the state machine and returns the next question (or the final recommendation).
+
+**Free-form text during triage:** If the user types free-form text (not a chip click) while triage is active, `respondTo()` detects the active triage state, abandons it by resetting `triage_state` to `idle`, and falls through to the LLM generation path. The system prompt is augmented with a note that the triage was abandoned, instructing the model to answer the free-form question directly. Chip clicks sent after triage completion (state `completed`) are handled by the standard free-form LLM path.
+
+**State persistence:** Triage state is persisted in the conversation's `metadata` JSON column on every state change. The Livewire component re-loads the conversation from the database on each request (protected property, not serialized), ensuring state survives page navigation.
 
 ## Escalation
 
@@ -296,10 +340,12 @@ The bot never refuses rudely. It redirects politely.
 
 Implemented at multiple layers:
 
-1. **System prompt** — strongly worded constraints.
+1. **System prompt** — strongly worded constraints with multi-turn few-shot examples.
 2. **Input filter** — rate limit + max message length (500 chars).
-3. **Output filter** — post-generation check: if response contains forbidden patterns (specific legal advice phrases, fee amounts not in context), regenerate with stricter prompt; if still bad, escalate.
-4. **Conversation review** — admin can flag bad responses; flagged conversations feed into prompt improvement.
+3. **Output filter** — post-generation check: if response contains forbidden patterns (specific legal advice phrases, unauthorized fee amounts), regenerate with stricter prompt; if still bad, escalate.
+4. **Chip filter** — server-side anti-redundancy on suggestion chips (see above).
+5. **Repetition guard** — server-side anti-repetition with regeneration path (see above).
+6. **Conversation review** — admin can flag bad responses; flagged conversations feed into prompt improvement.
 
 ## Failure modes
 

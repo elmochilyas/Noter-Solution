@@ -187,12 +187,21 @@
                     @if (count($suggestions) > 0 && !$isTyping && !$escalationPanel)
                         <div class="flex flex-wrap gap-2 pt-1">
                             @foreach ($suggestions as $suggestion)
+                                @php
+                                    $label = is_string($suggestion)
+                                        ? (Lang::has('chatbot.category_'.$suggestion)
+                                            ? __('chatbot.category_'.$suggestion)
+                                            : (Lang::has('chatbot.triage_'.$suggestion)
+                                                ? __('chatbot.triage_'.$suggestion)
+                                                : $suggestion))
+                                        : '';
+                                @endphp
                                 <button
                                     wire:click="sendSuggestion('{{ e(is_string($suggestion) ? $suggestion : '') }}')"
                                     type="button"
                                     class="text-xs px-3 py-1.5 rounded-full border border-brass-200 bg-brass-50 text-brass-700 hover:bg-brass-100 hover:border-brass-300 transition-fast"
                                 >
-                                    {{ $suggestion }}
+                                    {{ $label }}
                                 </button>
                             @endforeach
                         </div>
