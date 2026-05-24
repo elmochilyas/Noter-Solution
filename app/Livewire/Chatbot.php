@@ -8,6 +8,7 @@ use App\Models\ConsultationPlan;
 use App\ValueObjects\MoneyMad;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Lang;
 use Livewire\Component;
 
 class Chatbot extends Component
